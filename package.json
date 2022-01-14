@@ -1,28 +1,13 @@
 {
   "name": "@ensdomains/offchain-resolver",
   "version": "0.0.1",
+  "description": "Packages for an ENS offchain resolver",
   "main": "index.js",
   "repository": "git@github.com:ensdomains/offchain-resolver.git",
   "author": "Nick Johnson <arachnid@notdot.net>",
   "license": "MIT",
-  "private": false,
-  "scripts": {
-    "test": "npx hardhat test",
-    "lint": "npx hardhat check",
-    "build": "npx hardhat compile",
-    "prepublishOnly": "yarn build",
-    "pub": "yarn publish --access public"
-  },
-  "devDependencies": {
-    "@chainlink/ethers-ccip-read-provider": "^0.1.0",
-    "@nomiclabs/hardhat-ethers": "^2.0.3",
-    "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "chai": "^4.3.4",
-    "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.5.2",
-    "hardhat": "^2.8.0"
-  },
-  "dependencies": {
-    "@ensdomains/ens-contracts": "^0.0.8"
-  }
+  "workspaces": [
+    "packages/*"
+  ],
+  "private": true
 }
