@@ -49,7 +49,8 @@ contract SignatureVerifier is IVerifier {
      * @return The `result` decoded from `response`, or a revert if the signature does not verify correctly.
      */
     function verify(bytes calldata request, bytes calldata response) external override view returns(bytes memory) {
-        (bytes memory result, uint64 expires, bytes memory sig) = abi.decode(response, (bytes, uint64, bytes));
+        (bytes memory responseData) = abi.decode(response, (bytes));
+        (bytes memory result, uint64 expires, bytes memory sig) = abi.decode(responseData, (bytes, uint64, bytes));
         require(
             signers[ECDSA.recover(makeSignatureHash(msg.sender, expires, request, result), sig)], 
             "SignatureVerifier: Invalid sigature");

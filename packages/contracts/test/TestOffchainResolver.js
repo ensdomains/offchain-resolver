@@ -82,9 +82,10 @@ describe('OffchainResolver', function (accounts) {
         it('resolves an address given a valid signature', async () => {
             // Generate the response data
             const responseData = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, hexConcat([sig.r, sig._vs])]);
+            const response = defaultAbiCoder.encode(['bytes'], [responseData]);
 
             // Call the function with the request and response
-            const [result] = iface.decodeFunctionResult("addr", await resolver.resolveWithProof(responseData, callData));
+            const [result] = iface.decodeFunctionResult("addr", await resolver.resolveWithProof(response, callData));
             expect(result).to.equal(TEST_ADDRESS);
         });
 
@@ -95,17 +96,19 @@ describe('OffchainResolver', function (accounts) {
 
             // Generate the response data
             const responseData = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, deadsig]);
+            const response = defaultAbiCoder.encode(['bytes'], [responseData]);
 
             // Call the function with the request and response
-            await expect(resolver.resolveWithProof(responseData, callData)).to.be.reverted;
+            await expect(resolver.resolveWithProof(response, callData)).to.be.reverted;
         });
 
         it('reverts given an expired signature', async () => {
             // Generate the response data
             const responseData = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, Math.floor(Date.now() / 1000 - 1), hexConcat([sig.r, sig._vs])]);
+            const response = defaultAbiCoder.encode(['bytes'], [responseData]);
 
             // Call the function with the request and response
-            await expect(resolver.resolveWithProof(responseData, callData)).to.be.reverted;
+            await expect(resolver.resolveWithProof(response, callData)).to.be.reverted;
         });
     });
 });
