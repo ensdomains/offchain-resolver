@@ -14,3 +14,86 @@ The gateway server implements CCIP Read (EIP 3668), and answers requests by look
 ## [Contracts](packages/contracts)
 
 The smart contract provides a resolver stub that implement CCIP Read (EIP 3668) and ENS wildcard resolution (ENSIP 10). When queried for a name, it directs the client to query the gateway server. When called back with the gateway server response, the resolver verifies the signature was produced by an authorised signer, and returns the response to the client.
+
+## Trying it out
+
+First, build and run a test node with an ENS registry and the offchain resolver deployed:
+```
+cd packages/contracts
+yarn
+npx hardhat node
+```
+
+You will see output similar to the following:
+
+```
+Compilation finished successfully
+deploying "ENSRegistry" (tx: 0x8b353610592763c0abd8b06305e9e82c1b14afeecac99b1ce1ee54f5271baa2c)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 1084532 gas
+deploying "OffchainResolver" (tx: 0xdb3142c2c4d214b58378a5261859a7f104908a38b4b9911bb75f8f21aa28e896)...: deployed at 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 with 1533637 gas
+Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:9545/
+
+Accounts
+========
+
+WARNING: These accounts, and their private keys, are publicly known.
+Any funds sent to them on Mainnet or any other live network WILL BE LOST.
+
+Account #0: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
+Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
+Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+
+(truncated for brevity)
+```
+
+Take note of the address to which the ENSRegistry was deployed (0x5FbDB...) and the address and private key for account #0.
+
+Next, in a new terminal, build and run the gateway:
+
+```
+cd packages/gateway
+yarn && yarn build
+yarn start --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
+```
+
+The value for the `--private-key` flag should be the key for account 0 - most likely it will be the same as you see here.
+
+Take a look at the data in `test.eth.json`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
+
+Finally, in a third terminal, run the example client to demonstrate resolving a name:
+
+```
+cd packages/client
+yarn && yarn build
+yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
+yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
+```
+
+You should see output similar to the following:
+
+```
+$ yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
+yarn run v1.22.17
+$ node dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
+test.eth: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Done in 0.28s.
+
+$ yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
+yarn run v1.22.17
+$ node dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
+foo.test.eth: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+Done in 0.23s.
+```
+
+Check these addresses against the gateway's `test.eth.json` and you will see that they match.
+
+## Real-world usage
+
+There are 5 main steps to using this in production:
+
+ 1. Optionally, write a new backend for the gateway that queries your own data store. Or, use the JSON one and write your records to a JSON file in the format described in the gateway repository.
+ 2. Generate one or more signing keys. Secure these appropriately; posession of the signing keys makes it possible to forge name resolution responses!
+ 3. Start up a gateway server using your name database and a signing key. Publish it on a publicly-accessible URL.
+ 4. Deploy `OffchainResolver` to Ethereum, providing it with the gateway URL and list of signing key addresses.
+ 5. Set the newly deployed resolver as the resolver for one or more ENS names.
