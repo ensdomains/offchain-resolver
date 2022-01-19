@@ -63,9 +63,7 @@ describe('makeServer', () => {
         // Call the server with address and data
         const {status, body} = await server.call({to: TEST_ADDRESS, data: outerData});
         // Decode the response from 'resolve'
-        const [ responseData ] = IResolverService.decodeFunctionResult('resolve', body.data);
-        // Decode the inner data intended for the callback function
-        const [ result, validUntil, sigData ] = ethers.utils.defaultAbiCoder.decode(['bytes', 'uint64', 'bytes'], responseData);
+        const [ result, validUntil, sigData ] = IResolverService.decodeFunctionResult('resolve', body.data);
         // Check the signature
         let messageHash = ethers.utils.solidityKeccak256(
             ['bytes', 'address', 'uint64', 'bytes32', 'bytes32'],

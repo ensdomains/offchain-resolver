@@ -9,8 +9,8 @@ import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { FetchJsonResponse } from '@ethersproject/web';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
+
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
-import SignatureVerifier_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/SignatureVerifier.sol/SignatureVerifier.json';
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
 
 chai.use(chaiAsPromised);
@@ -114,13 +114,11 @@ describe('End to end test', () => {
   const proxyMiddleware = new RevertNormalisingMiddleware(baseProvider);
   const ccipProvider = new CCIPReadProvider(proxyMiddleware, fetcher);
 
-  let verifier: ethers.Contract;
   let resolver: ethers.Contract;
   let snapshot: number;
 
   beforeAll(async () => {
-    verifier = await deploySolidity(SignatureVerifier_abi, signer, [signerAddress]);
-    resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, verifier.address)).connect(ccipProvider);
+    resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [signerAddress])).connect(ccipProvider);
     snapshot = await baseProvider.send('evm_snapshot', []);
   });
 

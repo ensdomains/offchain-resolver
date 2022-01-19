@@ -103,12 +103,7 @@ export function makeServer(
         );
         const sig = signer.signDigest(messageHash);
         const sigData = hexConcat([sig.r, sig._vs]);
-        return [
-          ethers.utils.defaultAbiCoder.encode(
-            ['bytes', 'uint64', 'bytes'],
-            [result, validUntil, sigData]
-          ),
-        ];
+        return [result, validUntil, sigData];
       },
     },
   ]);

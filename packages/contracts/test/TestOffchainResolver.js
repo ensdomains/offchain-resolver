@@ -7,7 +7,7 @@ const { defaultAbiCoder, SigningKey, arrayify, hexConcat } = require("ethers/lib
 const TEST_ADDRESS = "0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe";
 
 describe('OffchainResolver', function (accounts) {
-    let provider, signer, address, verifier, resolver, snapshot, signingKey, signingAddress;
+    let provider, signer, address, resolver, snapshot, signingKey, signingAddress;
 
     async function fetcher(url, json) {
         console.log({url, json});
@@ -26,10 +26,8 @@ describe('OffchainResolver', function (accounts) {
         provider = new CCIPReadProvider(ethers.provider, fetcher);
         signer = await provider.getSigner();
         address = await signer.getAddress();
-        const SignatureVerifier = await ethers.getContractFactory("SignatureVerifier");
-        verifier = await SignatureVerifier.deploy([signingAddress]);
         const OffchainResolver = await ethers.getContractFactory("OffchainResolver");
-        resolver = await OffchainResolver.deploy("http://localhost:8000/", verifier.address);
+        resolver = await OffchainResolver.deploy("http://localhost:8000/", [signingAddress]);
     });
 
     beforeEach(async () => {
@@ -56,7 +54,7 @@ describe('OffchainResolver', function (accounts) {
         });
     });
 
-    describe('resolveWithSig()', async () => {
+    describe('resolveWithProof()', async () => {
         let name, expires, iface, callData, resultData, sig;
 
         before(async () => {
@@ -73,7 +71,7 @@ describe('OffchainResolver', function (accounts) {
             resultData = iface.encodeFunctionResult("addr", [TEST_ADDRESS]);
 
             // Generate a signature hash for the response from the gateway
-            const callDataHash = await verifier.makeSignatureHash(resolver.address, expires, callData, resultData);
+            const callDataHash = await resolver.makeSignatureHash(resolver.address, expires, callData, resultData);
 
             // Sign it
             sig = signingKey.signDigest(callDataHash);
@@ -81,8 +79,7 @@ describe('OffchainResolver', function (accounts) {
 
         it('resolves an address given a valid signature', async () => {
             // Generate the response data
-            const responseData = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, hexConcat([sig.r, sig._vs])]);
-            const response = defaultAbiCoder.encode(['bytes'], [responseData]);
+            const response = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, hexConcat([sig.r, sig._vs])]);
 
             // Call the function with the request and response
             const [result] = iface.decodeFunctionResult("addr", await resolver.resolveWithProof(response, callData));
@@ -95,8 +92,7 @@ describe('OffchainResolver', function (accounts) {
             deadsig[0] = deadsig[0] + 1;
 
             // Generate the response data
-            const responseData = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, deadsig]);
-            const response = defaultAbiCoder.encode(['bytes'], [responseData]);
+            const response = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, deadsig]);
 
             // Call the function with the request and response
             await expect(resolver.resolveWithProof(response, callData)).to.be.reverted;
@@ -104,8 +100,7 @@ describe('OffchainResolver', function (accounts) {
 
         it('reverts given an expired signature', async () => {
             // Generate the response data
-            const responseData = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, Math.floor(Date.now() / 1000 - 1), hexConcat([sig.r, sig._vs])]);
-            const response = defaultAbiCoder.encode(['bytes'], [responseData]);
+            const response = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, Math.floor(Date.now() / 1000 - 1), hexConcat([sig.r, sig._vs])]);
 
             // Call the function with the request and response
             await expect(resolver.resolveWithProof(response, callData)).to.be.reverted;

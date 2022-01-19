@@ -1,6 +1,3 @@
-// import { makeApp } from '../src/server';
-// import { readFileSync } from 'fs';
-// import { ethers } from 'ethers';
 import { JSONDatabase } from '../src/json';
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
