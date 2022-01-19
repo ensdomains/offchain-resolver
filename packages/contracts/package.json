@@ -22,9 +22,11 @@
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.2",
-    "hardhat": "^2.8.0"
+    "hardhat": "^2.8.0",
+    "hardhat-deploy": "^0.9.24"
   },
   "dependencies": {
-    "@ensdomains/ens-contracts": "^0.0.8"
+    "@ensdomains/ens-contracts": "^0.0.8",
+    "hardhat-deploy-ethers": "^0.3.0-beta.13"
   }
 }

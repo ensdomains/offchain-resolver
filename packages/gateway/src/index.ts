@@ -28,4 +28,5 @@ const signer = new ethers.utils.SigningKey(privateKey);
 const db = JSONDatabase.fromFilename(options.data, parseInt(options.ttl));
 
 const app = makeApp(signer, '/', db);
+console.log(`Listening on port ${options.port}`);
 app.listen(parseInt(options.port));
