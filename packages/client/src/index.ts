@@ -34,7 +34,7 @@ function dnsName(name: string) {
 const program = new Command();
 program
   .requiredOption('-r --registry <address>', 'ENS registry address')
-  .option('-p --provider <url>', 'web3 provider URL', 'http://localhost:9545/')
+  .option('-p --provider <url>', 'web3 provider URL', 'http://localhost:8545/')
   .argument('<name>');
 
 program.parse(process.argv);
