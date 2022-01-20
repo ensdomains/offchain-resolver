@@ -20,7 +20,33 @@ The smart contract provides a resolver stub that implement CCIP Read (EIP 3668) 
 
 ## Trying it out
 
-First, build and run a test node with an ENS registry and the offchain resolver deployed:
+Start by generating an Ethereum private key; this will be used as a signing key for any messages signed by your gateway service. You can use a variety of tools for this; for instance, this Python snippet will generate one for you:
+
+```
+python3 -c "import os; import binascii; print('0x%s' % binascii.hexlify(os.urandom(32)).decode('utf-8'))"
+```
+
+For the rest of this demo we will be using the standard test private key `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`.
+
+Next, build and run the gateway:
+
+```
+cd packages/gateway
+yarn && yarn build
+yarn start --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
+```
+
+The value for the `--private-key` flag should be the key you generated earlier.
+
+You will see output similar to the following:
+```
+Serving on port 8000 with signing address 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+Take a look at the data in `test.eth.json`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
+
+Next, edit `contracts/deploy/10_offchain_resolver.js`; replacing the address on line 9 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
+
 ```
 cd packages/contracts
 yarn
@@ -44,25 +70,10 @@ Any funds sent to them on Mainnet or any other live network WILL BE LOST.
 Account #0: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
 Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
-Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
-Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-
 (truncated for brevity)
 ```
 
-Take note of the address to which the ENSRegistry was deployed (0x5FbDB...) and the address and private key for account #0.
-
-Next, in a new terminal, build and run the gateway:
-
-```
-cd packages/gateway
-yarn && yarn build
-yarn start --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
-```
-
-The value for the `--private-key` flag should be the key for account 0 - most likely it will be the same as you see here.
-
-Take a look at the data in `test.eth.json`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
+Take note of the address to which the ENSRegistry was deployed (0x5FbDB...).
 
 Finally, in a third terminal, run the example client to demonstrate resolving a name:
 
