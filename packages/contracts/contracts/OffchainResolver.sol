@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/SupportsInterface.sol";
 import "./IExtendedResolver.sol";
+import "./SignatureVerifier.sol";
 
 interface IResolverService {
     function resolve(bytes calldata name, bytes calldata data) external view returns(bytes memory result, uint64 expires, bytes memory sig);
@@ -28,32 +28,8 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
         emit NewSigners(_signers);
     }
 
-    /**
-     * @dev Generates a hash for signing/verifying.
-     * @param target: The address the signature is for.
-     * @param request: The original request that was sent.
-     * @param result: The `result` field of the response (not including the signature part).
-     */
-    function makeSignatureHash(address target, uint64 expires, bytes memory request, bytes memory result) public pure returns(bytes32) {
-        return keccak256(abi.encodePacked(hex"1900", target, expires, keccak256(request), keccak256(result)));
-    }
-
-    /**
-     * @dev Verifies a signed message returned from a callback.
-     * @param request: The original request that was sent.
-     * @param response: An ABI encoded tuple of `(bytes result, uint64 expires, bytes sig)`, where `result` is the data to return
-     *        to the caller, and `sig` is the (r,s,v) encoded message signature.
-     * @return The `result` decoded from `response`, or a revert if the signature does not verify correctly.
-     */
-    function verify(bytes calldata request, bytes calldata response) public view returns(bytes memory) {
-        (bytes memory result, uint64 expires, bytes memory sig) = abi.decode(response, (bytes, uint64, bytes));
-        require(
-            signers[ECDSA.recover(makeSignatureHash(address(this), expires, request, result), sig)], 
-            "SignatureVerifier: Invalid sigature");
-        require(
-            expires >= block.timestamp,
-            "SignatureVerifier: Signature expired");
-        return result;
+    function makeSignatureHash(address target, uint64 expires, bytes memory request, bytes memory result) external pure returns(bytes32) {
+        return SignatureVerifier.makeSignatureHash(target, expires, request, result);
     }
 
     /**
@@ -79,7 +55,10 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
      * Callback used by CCIP read compatible clients to verify and parse the response.
      */
     function resolveWithProof(bytes calldata response, bytes calldata extraData) external view returns(bytes memory) {
-        bytes memory result = verify(extraData, response);
+        (address signer, bytes memory result) = SignatureVerifier.verify(extraData, response);
+        require(
+            signers[signer],
+            "SignatureVerifier: Invalid sigature");
         return result;
     }
 
