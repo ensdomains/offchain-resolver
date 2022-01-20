@@ -17,7 +17,8 @@ chai.use(chaiAsPromised);
 
 const Resolver = new ethers.utils.Interface(Resolver_abi.abi);
 
-const TEST_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const TEST_PRIVATE_KEY =
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const TEST_URL = 'http://localhost:8000/rpc/{sender}/{callData}.json';
 
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
@@ -66,35 +67,41 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
 
 const TEST_DB = {
   '*.eth': {
-      addresses: {
-          42: "0x2345234523452345234523452345234523452345"
-      }
+    addresses: {
+      42: '0x2345234523452345234523452345234523452345',
+    },
   },
   'test.eth': {
-      addresses: {
-          42: "0x3456345634563456345634563456345634563456"
-      }
-  }
+    addresses: {
+      42: '0x3456345634563456345634563456345634563456',
+    },
+  },
 };
 
 function dnsName(name: string) {
   // strip leading and trailing .
   const n = name.replace(/^\.|\.$/gm, '');
 
-  var bufLen = (n === '') ? 1 : n.length + 2;
+  var bufLen = n === '' ? 1 : n.length + 2;
   var buf = Buffer.allocUnsafe(bufLen);
 
   let offset = 0;
   if (n.length) {
-      const list = n.split('.');
-      for (let i = 0; i < list.length; i++) {
-          const len = buf.write(list[i], offset + 1)
-          buf[offset] = len;
-          offset += len + 1;
-      }
+    const list = n.split('.');
+    for (let i = 0; i < list.length; i++) {
+      const len = buf.write(list[i], offset + 1);
+      buf[offset] = len;
+      offset += len + 1;
+    }
   }
   buf[offset++] = 0;
-  return '0x' + buf.reduce((output, elem) => (output + ('0' + elem.toString(16)).slice(-2)), '');
+  return (
+    '0x' +
+    buf.reduce(
+      (output, elem) => output + ('0' + elem.toString(16)).slice(-2),
+      ''
+    )
+  );
 }
 
 describe('End to end test', () => {
@@ -103,8 +110,14 @@ describe('End to end test', () => {
   const db = new JSONDatabase(TEST_DB, 300);
   const server = makeServer(key, db);
 
-  async function fetcher(_url: string, _json?: string, _processFunc?: (value: any, response: FetchJsonResponse) => any) {
-    const [_match, to, data] = _url.match(/http:\/\/localhost:8000\/rpc\/([^/]+)\/([^/]+).json/) as RegExpMatchArray;
+  async function fetcher(
+    url: string,
+    _json?: string,
+    _processFunc?: (value: any, response: FetchJsonResponse) => any
+  ) {
+    const [to, data] = (url.match(
+      /http:\/\/localhost:8000\/rpc\/([^/]+)\/([^/]+).json/
+    ) as RegExpMatchArray).slice(1);
     const ret = await server.call({ to, data });
     return ret;
   }
@@ -118,7 +131,11 @@ describe('End to end test', () => {
   let snapshot: number;
 
   beforeAll(async () => {
-    resolver = (await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [signerAddress])).connect(ccipProvider);
+    resolver = (
+      await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [
+        signerAddress,
+      ])
+    ).connect(ccipProvider);
     snapshot = await baseProvider.send('evm_snapshot', []);
   });
 
@@ -128,7 +145,9 @@ describe('End to end test', () => {
 
   describe('resolve()', () => {
     it('resolves calls to addr(bytes32)', async () => {
-      const callData = Resolver.encodeFunctionData('addr(bytes32)', [ethers.utils.namehash('test.eth')]);
+      const callData = Resolver.encodeFunctionData('addr(bytes32)', [
+        ethers.utils.namehash('test.eth'),
+      ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
       expect(resultData).to.deep.equal([TEST_DB['test.eth'].addresses[42]]);

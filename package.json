@@ -7,7 +7,7 @@
   "author": "Nick Johnson <arachnid@notdot.net>",
   "license": "MIT",
   "workspaces": [
-    "packages/*"
+    "packages/contracts", "packages/gateway", "packages/client"
   ],
   "private": true,
   "scripts": {
