@@ -13,7 +13,8 @@
     "lint": "npx hardhat check",
     "build": "npx hardhat compile",
     "prepublishOnly": "yarn build",
-    "pub": "yarn publish --access public"
+    "pub": "yarn publish --access public",
+    "clean": "rm -fr node_modules artifacts cache"
   },
   "devDependencies": {
     "@chainlink/ethers-ccip-read-provider": "^0.2.0",
