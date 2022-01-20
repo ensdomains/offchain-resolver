@@ -9,7 +9,7 @@
     "artifacts/contracts/**/*.json"
   ],
   "scripts": {
-    "test": "npx hardhat test",
+    "test": "run() { npx hardhat test; }; run",
     "lint": "npx hardhat check",
     "build": "npx hardhat compile",
     "prepublishOnly": "yarn build",
