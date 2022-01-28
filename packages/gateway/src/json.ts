@@ -19,8 +19,8 @@ export class JSONDatabase implements Database {
     // Insert an empty synthetic wildcard record for every concrete name that doesn't have one
     // This is to ensure that if '*.eth' exists and 'test.eth' exists, 'blah.test.eth' does not resolve to '*.eth'.
     this.data = Object.assign({}, data);
-    for(const k of Object.keys(this.data)) {
-      if(!k.startsWith('*.') && !this.data['*.' + k]) {
+    for (const k of Object.keys(this.data)) {
+      if (!k.startsWith('*.') && !this.data['*.' + k]) {
         this.data['*.' + k] = {};
       }
     }

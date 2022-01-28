@@ -85,10 +85,7 @@ async function query(
   };
 }
 
-export function makeServer(
-  signer: ethers.utils.SigningKey,
-  db: Database
-) {
+export function makeServer(signer: ethers.utils.SigningKey, db: Database) {
   const server = new Server();
   server.add(IResolverService_abi, [
     {

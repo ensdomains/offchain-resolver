@@ -7,7 +7,14 @@
   "author": "Nick Johnson <arachnid@notdot.net>",
   "license": "MIT",
   "workspaces": [
-    "packages/*"
+    "packages/contracts", "packages/gateway", "packages/client"
   ],
-  "private": true
+  "private": true,
+  "scripts": {
+    "test": "yarn workspaces run test",
+    "lint": "yarn workspaces run lint",
+    "build": "yarn workspaces run build",
+    "docs": "typedoc --entryPointStrategy packages packages/server packages/ethers-ccip-read-provider",
+    "clean": "rm -fr node_modules && yarn workspaces run clean"
+  }
 }

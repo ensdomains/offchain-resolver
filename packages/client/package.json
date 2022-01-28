@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.1",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -16,7 +16,9 @@
     "lint": "tsdx lint",
     "prepare": "tsdx build",
     "size": "size-limit",
-    "analyze": "size-limit --why"
+    "analyze": "size-limit --why",
+    "clean": "rm -fr node_modules dist",
+    "test": "echo No tests"
   },
   "peerDependencies": {},
   "husky": {
@@ -52,7 +54,7 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "@chainlink/ethers-ccip-read-provider": "^0.2.0",
+    "@chainlink/ethers-ccip-read-provider": "^0.2.2",
     "commander": "^8.3.0",
     "ethers": "^5.5.3"
   }
