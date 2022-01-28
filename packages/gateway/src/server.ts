@@ -18,6 +18,10 @@ export interface Database {
     name: string,
     coinType: number
   ): PromiseOrResult<{ addr: string; ttl: number }>;
+  text(
+    name: string,
+    key: string
+  ): PromiseOrResult<{ value: string; ttl: number }>;
 }
 
 function decodeDnsName(dnsname: Buffer) {
@@ -46,6 +50,10 @@ const queryHandlers: {
   'addr(bytes32,uint256)': async (db, name, args) => {
     const { addr, ttl } = await db.addr(name, args[0]);
     return { result: [addr], ttl };
+  },
+  'text(bytes32,string)': async (db, name, args) => {
+    const { value, ttl } = await db.text(name, args[0]);
+    return { result: [value], ttl };
   },
 };
 
