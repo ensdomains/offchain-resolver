@@ -6,7 +6,7 @@ module.exports = async ({deployments}) => {
     const owner = signers[0].address;
     const resolver = await deploy('OffchainResolver', {
         from: owner,
-        args: ['http://localhost:8000/{sender}/{callData}.json', ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266']],
+        args: ['http://localhost:8000/{sender}/{data}.json', ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266']],
         log: true,
     });
     
