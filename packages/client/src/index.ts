@@ -47,7 +47,6 @@ program.parse(process.argv);
 
 const options = program.opts();
 const baseProvider = ethers.getDefaultProvider(options.provider);
-console.log({baseProvider}, options.provider)
 const provider = new CCIPReadProvider(baseProvider);
 
 (async () => {
