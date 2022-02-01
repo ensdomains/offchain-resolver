@@ -15,7 +15,6 @@ export class JSONDatabase implements Database {
   ttl: number;
 
   constructor(data: ZoneData, ttl: number) {
-    console.log('***JSONDatabase')
     // Insert an empty synthetic wildcard record for every concrete name that doesn't have one
     // This is to ensure that if '*.eth' exists and 'test.eth' exists, 'blah.test.eth' does not resolve to '*.eth'.
     this.data = Object.assign({}, data);
@@ -35,15 +34,10 @@ export class JSONDatabase implements Database {
   }
 
   addr(name: string, coinType: number) {
-    console.log('***addr1', {name, coinType})
-    // throw('*** throw addr')
     const nameData = this.findName(name);
-    console.log('***addr2', {nameData})
     if (!nameData || !nameData.addresses || !nameData.addresses[coinType]) {
-      console.log('***addr3')
       return { addr: ZERO_ADDRESS, ttl: this.ttl };
     }
-    console.log('***addr4')
     return { addr: nameData.addresses[coinType], ttl: this.ttl };
   }
 
@@ -57,7 +51,6 @@ export class JSONDatabase implements Database {
 
 
   private findName(name: string) {
-    console.log('***findName')
     if (this.data[name]) {
       return this.data[name];
     }

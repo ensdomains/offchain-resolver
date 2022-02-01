@@ -7,11 +7,19 @@ const TEST_DB = {
     addresses: {
       42: '0x2345234523452345234523452345234523452345',
     },
+    "text": {
+      "email": "info@example.com",
+      "description": "hello offchainresolver record"
+    }
   },
   'test.eth': {
     addresses: {
       42: '0x3456345634563456345634563456345634563456',
     },
+    "text": {
+      "email": "info@example.com",
+      "description": "hello offchainresolver record"
+    }
   },
 };
 
@@ -35,6 +43,18 @@ describe('JSONDatabase', () => {
   it('resolves wildcards', () => {
     expect(db.addr('foo.eth', 42)).toStrictEqual({
       addr: TEST_DB['*.eth'].addresses[42],
+      ttl: 300,
+    });
+  });
+
+  it('resolves text', () => {
+    expect(db.text('foo.eth', 'email')).toStrictEqual({
+      value: TEST_DB['*.eth'].text['email'],
+      ttl: 300,
+    });
+
+    expect(db.text('foo.eth', 'description')).toStrictEqual({
+      value: TEST_DB['*.eth'].text['description'],
       ttl: 300,
     });
   });
