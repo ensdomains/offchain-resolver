@@ -44,7 +44,7 @@ const queryHandlers: {
   ) => Promise<DatabaseResult>;
 } = {
   'addr(bytes32)': async (db, name, _args) => {
-    const { addr, ttl } = await db.addr(name, 42);
+    const { addr, ttl } = await db.addr(name, 60);
     return { result: [addr], ttl };
   },
   'addr(bytes32,uint256)': async (db, name, args) => {
