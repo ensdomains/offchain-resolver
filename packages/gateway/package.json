@@ -58,9 +58,10 @@
   "dependencies": {
     "@chainlink/ccip-read-server": "^0.2.1",
     "@ensdomains/ens-contracts": "^0.0.8",
-    "@ensdomains/offchain-resolver-contracts": "^0.2.1",
     "commander": "^8.3.0",
     "dotenv": "^15.0.0",
-    "ethers": "^5.5.2"
+    "ethers": "^5.5.2",
+    "express": "^4.17.2",
+    "makoto-ens-contracts": "^0.0.1"
   }
 }
