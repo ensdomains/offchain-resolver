@@ -1,0 +1,20 @@
+{
+    "offchainexample.eth": {
+        "addresses": {
+            "60": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        },
+        "text": {
+            "email": "vitalik@ethereum.org",
+            "description": "hello offchainresolver record"
+        }
+    },
+    "*.offchainexample.eth": {
+        "addresses": {
+            "60": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+        },
+        "text": {
+            "email": "vitalik@ethereum.org",
+            "description": "hello offchainresolver record"
+        }
+    }
+}
