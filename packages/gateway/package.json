@@ -60,8 +60,6 @@
     "@ensdomains/ens-contracts": "^0.0.8",
     "commander": "^8.3.0",
     "dotenv": "^15.0.0",
-    "ethers": "^5.5.2",
-    "express": "^4.17.2",
-    "makoto-ens-contracts": "^0.0.1"
+    "ethers": "^5.5.2"
   }
 }

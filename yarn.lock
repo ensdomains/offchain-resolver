@@ -6165,7 +6165,7 @@ expect@^25.5.0:
     jest-message-util "^25.5.0"
     jest-regex-util "^25.2.6"
 
-express@^4.14.0, express@^4.17.1, express@^4.17.2:
+express@^4.14.0, express@^4.17.1:
   version "4.17.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.17.2.tgz#c18369f265297319beed4e5558753cc8c1364cb3"
   integrity sha512-oxlxJxcQlYwqPWKVJJtvQiwHgosH/LrLSPA+H4UxpyvSS6jC5aH+5MoHFM+KABgTOt0APue4w66Ha8jCUo9QGg==
@@ -8960,16 +8960,6 @@ makeerror@1.0.12:
   integrity sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg==
   dependencies:
     tmpl "1.0.5"
-
-makoto-ens-contracts@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/makoto-ens-contracts/-/makoto-ens-contracts-0.0.1.tgz#c24635316e7d75768fba26109d8e1b39b0152c32"
-  integrity sha512-RNEZdyqiQw+p9/DjmT3R2pw+OI/weBEFwjilAwOgRXZtw7V88h2etEkzQSHS+/LhCfItajbInIiV3Bfnj8Nczw==
-  dependencies:
-    "@ensdomains/buffer" "^0.0.13"
-    "@ensdomains/solsha1" "0.0.3"
-    "@openzeppelin/contracts" "^4.1.0"
-    dns-packet "^5.3.0"
 
 map-age-cleaner@^0.1.1:
   version "0.1.3"
