@@ -1,10 +1,26 @@
 import { Server } from '@chainlink/ccip-read-server';
-import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
+// import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import { ethers, BytesLike } from 'ethers';
 import { hexConcat, Result } from 'ethers/lib/utils';
 
 const Resolver = new ethers.utils.Interface(Resolver_abi);
+const IResolverService_abi = [
+  {
+    inputs: [
+      { internalType: 'bytes', name: 'name', type: 'bytes' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
+    ],
+    name: 'resolve',
+    outputs: [
+      { internalType: 'bytes', name: 'result', type: 'bytes' },
+      { internalType: 'uint64', name: 'expires', type: 'uint64' },
+      { internalType: 'bytes', name: 'sig', type: 'bytes' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
 
 interface DatabaseResult {
   result: any[];

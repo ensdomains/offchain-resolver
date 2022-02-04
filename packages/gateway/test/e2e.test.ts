@@ -70,13 +70,13 @@ const TEST_DB = {
     addresses: {
       42: '0x2345234523452345234523452345234523452345',
     },
-    text:{ email: "wildcard@example.com" }
+    text: { email: 'wildcard@example.com' },
   },
   'test.eth': {
     addresses: {
       42: '0x3456345634563456345634563456345634563456',
     },
-    text:{ email: "test@example.com" }
+    text: { email: 'test@example.com' },
   },
 };
 
@@ -157,10 +157,14 @@ describe('End to end test', () => {
 
     it('resolves calls to text(bytes32,string)', async () => {
       const callData = Resolver.encodeFunctionData('text(bytes32,string)', [
-        ethers.utils.namehash('test.eth'), 'email'
+        ethers.utils.namehash('test.eth'),
+        'email',
       ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
-      const resultData = Resolver.decodeFunctionResult('text(bytes32,string)', result);
+      const resultData = Resolver.decodeFunctionResult(
+        'text(bytes32,string)',
+        result
+      );
       expect(resultData).to.deep.equal([TEST_DB['test.eth'].text['email']]);
     });
   });

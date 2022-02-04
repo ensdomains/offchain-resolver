@@ -16,13 +16,13 @@ const TEST_DB = {
     addresses: {
       42: '0x2345234523452345234523452345234523452345',
     },
-    text:{ email: "wildcard@example.com" }
+    text: { email: 'wildcard@example.com' },
   },
   'test.eth': {
     addresses: {
       42: '0x3456345634563456345634563456345634563456',
     },
-    text:{ email: "test@example.com" }
+    text: { email: 'test@example.com' },
   },
 };
 
@@ -166,7 +166,11 @@ describe('makeServer', () => {
 
   describe('text(bytes32,string)', () => {
     it('resolves exact names', async () => {
-      const response = await makeCall('text(bytes32,string)', 'test.eth', 'email');
+      const response = await makeCall(
+        'text(bytes32,string)',
+        'test.eth',
+        'email'
+      );
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('text(bytes32,string)', [
@@ -176,7 +180,11 @@ describe('makeServer', () => {
     });
 
     it('resolves wildcard names', async () => {
-      const response = await makeCall('text(bytes32,string)', 'foo.eth', 'email');
+      const response = await makeCall(
+        'text(bytes32,string)',
+        'foo.eth',
+        'email'
+      );
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('text(bytes32,string)', [
@@ -186,10 +194,16 @@ describe('makeServer', () => {
     });
 
     it('resolves nonexistent names', async () => {
-      const response = await makeCall('text(bytes32,string)', 'test.test', 'email');
+      const response = await makeCall(
+        'text(bytes32,string)',
+        'test.test',
+        'email'
+      );
       expect(response).toStrictEqual({
         status: 200,
-        result: Resolver.encodeFunctionResult('text(bytes32,string)', [ZERO_ADDRESS]),
+        result: Resolver.encodeFunctionResult('text(bytes32,string)', [
+          ZERO_ADDRESS,
+        ]),
       });
     });
   });
