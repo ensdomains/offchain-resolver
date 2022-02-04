@@ -4,7 +4,23 @@ import { CCIPReadProvider } from '@chainlink/ethers-ccip-read-provider';
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import { abi as ENSRegistry_abi } from '@ensdomains/ens-contracts/artifacts/contracts/registry/ENSRegistry.sol/ENSRegistry.json';
 // import { abi as IExtendedResolver_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/IExtendedResolver.sol/IExtendedResolver.json';
-import { OffchainResolver as IExtendedResolver_abi } from 'makoto-ens-contracts';
+const IExtendedResolver_abi = [
+  {
+    inputs: [
+      { internalType: 'bytes', name: 'name', type: 'bytes' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
+    ],
+    name: 'resolve',
+    outputs: [
+      { internalType: 'bytes', name: 'result', type: 'bytes' },
+      { internalType: 'uint64', name: 'expires', type: 'uint64' },
+      { internalType: 'bytes', name: 'sig', type: 'bytes' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
+
 // Almost all of this boilerplate will be unnecessary once ethers.js adds support
 // for ENSIP 10 and EIP 3668, but we're *early*.
 const Resolver = new ethers.utils.Interface(Resolver_abi);
