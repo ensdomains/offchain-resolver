@@ -6,12 +6,12 @@ import { JSONDatabase } from './json';
 import 'dotenv/config';
 require('dotenv').config();
 let options: any = {};
-if(process.env.OFFCHAIN_DATA && process.env.OFFCHAIN_PRIVATE_KEY){
-  options.data = process.env.OFFCHAIN_DATA
-  options.privateKey = process.env.OFFCHAIN_PRIVATE_KEY
-  options.ttl = process.env.OFFCHAIN_TTL
-  options.port = process.env.OFFCHAIN_PORT
-}else{
+if (process.env.OFFCHAIN_DATA && process.env.OFFCHAIN_PRIVATE_KEY) {
+  options.data = process.env.OFFCHAIN_DATA;
+  options.privateKey = process.env.OFFCHAIN_PRIVATE_KEY;
+  options.ttl = process.env.OFFCHAIN_TTL;
+  options.port = process.env.OFFCHAIN_PORT;
+} else {
   const program = new Command();
   program
     .requiredOption(

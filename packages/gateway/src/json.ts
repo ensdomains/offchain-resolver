@@ -49,7 +49,6 @@ export class JSONDatabase implements Database {
     return { value: nameData.text[key], ttl: this.ttl };
   }
 
-
   private findName(name: string) {
     if (this.data[name]) {
       return this.data[name];
