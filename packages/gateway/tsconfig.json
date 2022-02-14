@@ -2,8 +2,11 @@
   // see https://www.typescriptlang.org/tsconfig to better understand tsconfigs
   "include": ["src", "types"],
   "compilerOptions": {
-    "module": "esnext",
-    "lib": ["dom", "esnext"],
+    // "module": "esnext",
+    "target": "es6",
+    "module": "es6",
+    "lib": ["dom", "es6"],
+    // "lib": ["dom", "esnext"],
     "importHelpers": true,
     // output .d.ts declaration files for consumers
     "declaration": true,
