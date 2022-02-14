@@ -1,7 +1,6 @@
 import { JSONDatabase } from '../src/json';
-
+import { ETH_COIN_TYPE } from '../src/utils';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-const ETH_COIN_TYPE = 60;
 
 const TEST_DB = {
   '*.eth': {

@@ -8,7 +8,6 @@ real_accounts = undefined;
 if(process.env.DEPLOYER_KEY && process.env.OWNER_KEY) {
   real_accounts = [process.env.DEPLOYER_KEY, process.env.OWNER_KEY];
 }
-console.log({real_accounts}, process.env.DEPLOYER_KEY , process.env.OWNER_KEY)
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */

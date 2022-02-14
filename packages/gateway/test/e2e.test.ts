@@ -9,10 +9,9 @@ import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { FetchJsonResponse } from '@ethersproject/web';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
-
+import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
-const ETH_COIN_TYPE = 60;
 chai.use(chaiAsPromised);
 
 const Resolver = new ethers.utils.Interface(Resolver_abi.abi);

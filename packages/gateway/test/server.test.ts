@@ -3,13 +3,13 @@ import { ethers } from 'ethers';
 import { JSONDatabase } from '../src/json';
 import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
+import { ETH_COIN_TYPE } from '../src/utils';
 
 const IResolverService = new ethers.utils.Interface(IResolverService_abi);
 const Resolver = new ethers.utils.Interface(Resolver_abi);
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const TEST_ADDRESS = '0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe';
-const ETH_COIN_TYPE = 60;
 const TEST_DB = {
   '*.eth': {
     addresses: {
