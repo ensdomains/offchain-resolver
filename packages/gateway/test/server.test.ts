@@ -9,17 +9,17 @@ const Resolver = new ethers.utils.Interface(Resolver_abi);
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const TEST_ADDRESS = '0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe';
-
+const ETH_COIN_TYPE = 60;
 const TEST_DB = {
   '*.eth': {
     addresses: {
-      42: '0x2345234523452345234523452345234523452345',
+      [ETH_COIN_TYPE]: '0x2345234523452345234523452345234523452345',
     },
     text: { email: 'wildcard@example.com' },
   },
   'test.eth': {
     addresses: {
-      42: '0x3456345634563456345634563456345634563456',
+      [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
     },
     text: { email: 'test@example.com' },
   },
@@ -107,7 +107,7 @@ describe('makeServer', () => {
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('addr(bytes32)', [
-          TEST_DB['test.eth'].addresses[42],
+          TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
         ]),
       });
     });
@@ -117,7 +117,7 @@ describe('makeServer', () => {
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('addr(bytes32)', [
-          TEST_DB['*.eth'].addresses[42],
+          TEST_DB['*.eth'].addresses[ETH_COIN_TYPE],
         ]),
       });
     });
@@ -133,27 +133,39 @@ describe('makeServer', () => {
 
   describe('addr(bytes32,uint256)', () => {
     it('resolves exact names', async () => {
-      const response = await makeCall('addr(bytes32,uint256)', 'test.eth', 42);
+      const response = await makeCall(
+        'addr(bytes32,uint256)',
+        'test.eth',
+        ETH_COIN_TYPE
+      );
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('addr(bytes32,uint256)', [
-          TEST_DB['test.eth'].addresses[42],
+          TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
         ]),
       });
     });
 
     it('resolves wildcard names', async () => {
-      const response = await makeCall('addr(bytes32,uint256)', 'foo.eth', 42);
+      const response = await makeCall(
+        'addr(bytes32,uint256)',
+        'foo.eth',
+        ETH_COIN_TYPE
+      );
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('addr(bytes32,uint256)', [
-          TEST_DB['*.eth'].addresses[42],
+          TEST_DB['*.eth'].addresses[ETH_COIN_TYPE],
         ]),
       });
     });
 
     it('resolves nonexistent names', async () => {
-      const response = await makeCall('addr(bytes32,uint256)', 'test.test', 42);
+      const response = await makeCall(
+        'addr(bytes32,uint256)',
+        'test.test',
+        ETH_COIN_TYPE
+      );
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('addr(bytes32,uint256)', [

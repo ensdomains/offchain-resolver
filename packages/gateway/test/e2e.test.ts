@@ -12,7 +12,7 @@ import { makeServer } from '../src/server';
 
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
-
+const ETH_COIN_TYPE = 60;
 chai.use(chaiAsPromised);
 
 const Resolver = new ethers.utils.Interface(Resolver_abi.abi);
@@ -68,13 +68,13 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
 const TEST_DB = {
   '*.eth': {
     addresses: {
-      42: '0x2345234523452345234523452345234523452345',
+      [ETH_COIN_TYPE]: '0x2345234523452345234523452345234523452345',
     },
     text: { email: 'wildcard@example.com' },
   },
   'test.eth': {
     addresses: {
-      42: '0x3456345634563456345634563456345634563456',
+      [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
     },
     text: { email: 'test@example.com' },
   },
@@ -152,7 +152,9 @@ describe('End to end test', () => {
       ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).to.deep.equal([TEST_DB['test.eth'].addresses[42]]);
+      expect(resultData).to.deep.equal([
+        TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
+      ]);
     });
 
     it('resolves calls to text(bytes32,string)', async () => {
