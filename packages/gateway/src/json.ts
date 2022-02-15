@@ -44,7 +44,7 @@ export class JSONDatabase implements Database {
   text(name: string, key: string) {
     const nameData = this.findName(name);
     if (!nameData || !nameData.text || !nameData.text[key]) {
-      return { value: ZERO_ADDRESS, ttl: this.ttl };
+      return { value: '', ttl: this.ttl };
     }
     return { value: nameData.text[key], ttl: this.ttl };
   }
