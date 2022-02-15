@@ -212,9 +212,7 @@ describe('makeServer', () => {
       );
       expect(response).toStrictEqual({
         status: 200,
-        result: Resolver.encodeFunctionResult('text(bytes32,string)', [
-          ZERO_ADDRESS,
-        ]),
+        result: Resolver.encodeFunctionResult('text(bytes32,string)', ['']),
       });
     });
   });
