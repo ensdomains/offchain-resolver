@@ -1,9 +1,9 @@
 const { ethers } = require("hardhat");  
+const arguments = require('../arguments')
 module.exports = async ({getNamedAccounts, deployments, network}) => {
     const {deploy} = deployments;
     const {deployer, owner} = await getNamedAccounts();
-    var GATEWAY_HOST = 'https://offchain-resolver-example.uc.r.appspot.com'
-    var gatewayUrl = `${GATEWAY_HOST}/{sender}/{data}.json`
+    var gatewayUrl = arguments[0]
     await deploy('OffchainResolver', {
         from: deployer,
         args: [gatewayUrl, [owner]],

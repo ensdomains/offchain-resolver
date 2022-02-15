@@ -81,7 +81,7 @@ const provider = new CCIPReadProvider(baseProvider);
     const data = Resolver.encodeFunctionData('addr(bytes32)', [node]);
     const responseData = await resolver.resolve(dnsName(name), data);
     const addr = Resolver.decodeFunctionResult('addr(bytes32)', responseData);
-    console.log(`${name}: ${addr}`);
+    console.log(`addr: ${name}: ${addr}`);
 
     const textData = Resolver.encodeFunctionData('text(bytes32,string)', [
       node,
@@ -92,7 +92,7 @@ const provider = new CCIPReadProvider(baseProvider);
       'text(bytes32,string)',
       textResponseData
     );
-    console.log(`${name}: ${value}`);
+    console.log(`text('description'): ${name}: ${value}`);
   } catch (e) {
     console.log(e);
   }
