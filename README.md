@@ -33,10 +33,10 @@ Next, build and run the gateway:
 ```
 cd packages/gateway
 yarn && yarn build
-yarn start --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
+PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 DATA=test.eth.json PORT=8000 yarn start
 ```
 
-The value for the `--private-key` flag should be the key you generated earlier.
+The value for the `PRIVATE_KEY` envrionment key should be the key you generated earlier.
 
 You will see output similar to the following:
 ```

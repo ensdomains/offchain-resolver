@@ -3,27 +3,18 @@ import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { ethers } from 'ethers';
 import { JSONDatabase } from './json';
-import 'dotenv/config';
-require('dotenv').config();
 let options: any = {};
-if (process.env.OFFCHAIN_DATA && process.env.OFFCHAIN_PRIVATE_KEY) {
-  options.data = process.env.OFFCHAIN_DATA;
-  options.privateKey = process.env.OFFCHAIN_PRIVATE_KEY;
-  options.ttl = process.env.OFFCHAIN_TTL;
-  options.port = process.env.OFFCHAIN_PORT;
-} else {
-  const program = new Command();
-  program
-    .requiredOption(
-      '-k --private-key <key>',
-      'Private key to sign responses with. Prefix with @ to read from a file'
-    )
-    .requiredOption('-d --data <file>', 'JSON file to read data from')
-    .option('-t --ttl <number>', 'TTL for signatures', '300')
-    .option('-p --port <number>', 'Port number to serve on', '8000');
-  program.parse(process.argv);
-  options = program.opts();
-}
+const program = new Command();
+program
+  .requiredOption(
+    '-k --private-key <key>',
+    'Private key to sign responses with. Prefix with @ to read from a file'
+  )
+  .requiredOption('-d --data <file>', 'JSON file to read data from')
+  .option('-t --ttl <number>', 'TTL for signatures', '300')
+  .option('-p --port <number>', 'Port number to serve on', '8000');
+program.parse(process.argv);
+options = program.opts();
 let privateKey = options.privateKey;
 if (privateKey.startsWith('@')) {
   privateKey = ethers.utils.arrayify(

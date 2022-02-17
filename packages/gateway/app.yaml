@@ -1,1 +1,6 @@
 runtime: nodejs10
+env_variables:
+  PORT: 8080
+  DATA: "src/offchainexample.eth.json"
+includes:
+- secret.yaml

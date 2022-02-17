@@ -113,4 +113,4 @@ cache
 !.yarn/sdks
 !.yarn/versions
 
-.env
+secret.yaml

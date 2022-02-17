@@ -1,6 +1,6 @@
 import { Server } from '@chainlink/ccip-read-server';
-import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
-import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
+const IResolverService_abi = require('@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json').abi;
+const Resolver_abi = require('@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json').abi
 import { ethers, BytesLike } from 'ethers';
 import { hexConcat, Result } from 'ethers/lib/utils';
 import { ETH_COIN_TYPE } from './utils';
@@ -44,6 +44,7 @@ const queryHandlers: {
   ) => Promise<DatabaseResult>;
 } = {
   'addr(bytes32)': async (db, name, _args) => {
+    console.log('addr(bytes32')
     const { addr, ttl } = await db.addr(name, ETH_COIN_TYPE);
     return { result: [addr], ttl };
   },
