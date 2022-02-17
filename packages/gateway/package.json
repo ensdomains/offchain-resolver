@@ -11,7 +11,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/index.js --private-key $PRIVATE_KEY --data $DATA --port $PORT",
     "build": "tsdx build",
     "test": "tsdx test",
     "lint": "tsdx lint",
