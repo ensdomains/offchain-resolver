@@ -1,3 +1,5 @@
+const { task } = require("hardhat/config");
+
 require("@nomiclabs/hardhat-etherscan");
 require('@nomiclabs/hardhat-ethers');
 require('@nomiclabs/hardhat-waffle');
@@ -12,6 +14,21 @@ const gatewayurl = "https://offchain-resolver-example.uc.r.appspot.com/{sender}/
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+
+// Usage: INFURA_ID=$INFURA_ID ETHERSCAN_API_KEY=$ETHERSCAN_API_KEY npx hardhat  --network $NETWORK etherscanverify --resolver $CONTRACT_ADDRESS --signer $SIGNER_ADDRESS"
+task("etherscanverify", "Verifies contracts")
+  .addParam("resolver", "Resolver address")
+  .addParam("signer", "Signer address")
+  .setAction(async (taskArgs) => {
+    await hre.run("verify:verify", {
+      address: taskArgs.resolver,
+      constructorArguments: [
+        hre.network.config.gatewayurl,
+        [taskArgs.signer],
+      ],
+    });
+  });
+
 module.exports = {
   solidity: "0.8.10",
   networks: {
