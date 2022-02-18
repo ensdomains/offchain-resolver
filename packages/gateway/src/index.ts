@@ -12,7 +12,7 @@ program
   )
   .requiredOption('-d --data <file>', 'JSON file to read data from')
   .option('-t --ttl <number>', 'TTL for signatures', '300')
-  .option('-p --port <number>', 'Port number to serve on', '8000');
+  .option('-p --port <number>', 'Port number to serve on', '8080');
 program.parse(process.argv);
 options = program.opts();
 let privateKey = options.privateKey;

@@ -34,7 +34,7 @@ module.exports = {
   networks: {
     hardhat: {
       throwOnCallFailures: false,
-      gatewayurl:'http://localhost:8000/{sender}/{data}.json',
+      gatewayurl:'http://localhost:8080/{sender}/{data}.json',
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_ID}`,
