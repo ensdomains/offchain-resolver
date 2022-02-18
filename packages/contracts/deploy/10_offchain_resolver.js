@@ -8,11 +8,13 @@ module.exports = async ({getNamedAccounts, deployments, network}) => {
     }else{
         signer = owner
     }
-    if(!network.config.gatewayurl) throw("gatewayurl is missing on hardhat.config.js")
+    if(!network.config.gatewayurl){
+        throw("gatewayurl is missing on hardhat.config.js");
+    }
     await deploy('OffchainResolver', {
         from: deployer,
         args: [network.config.gatewayurl, [signer]],
         log: true,
     });
 };
-module.exports.tags = ['ens', 'demo'];
+module.exports.tags = ['test', 'demo'];

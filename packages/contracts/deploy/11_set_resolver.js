@@ -1,6 +1,5 @@
 const { ethers } = require("hardhat");  
-const arguments = require('../arguments')
-module.exports = async ({getNamedAccounts, deployments, network}) => {
+module.exports = async ({deployments}) => {
     const {deploy} = deployments;
     const signers = await ethers.getSigners();
     const owner = signers[0].address;
@@ -10,4 +9,4 @@ module.exports = async ({getNamedAccounts, deployments, network}) => {
     await registry.setSubnodeOwner(ethers.utils.namehash('eth'), ethers.utils.id('test'), owner, {from: owner});
     await registry.setResolver(ethers.utils.namehash('test.eth'), resolver.address, {from: owner});
 };
-module.exports.tags = ['ens'];
+module.exports.tags = ['test'];
