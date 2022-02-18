@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 module.exports = async ({getNamedAccounts, deployments, network}) => {
     const {deploy} = deployments;
     const {deployer, owner} = await getNamedAccounts();
-    if(network.name === 'hardhat'){
+    if(!network.tags.demo){
         signer = deployer
     }else{
         signer = owner
