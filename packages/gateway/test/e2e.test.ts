@@ -117,7 +117,7 @@ describe('End to end test', () => {
     _processFunc?: (value: any, response: FetchJsonResponse) => any
   ) {
     const [to, data] = (url.match(
-      /http:\/\/localhost:8000\/rpc\/([^/]+)\/([^/]+).json/
+      /http:\/\/localhost:8080\/rpc\/([^/]+)\/([^/]+).json/
     ) as RegExpMatchArray).slice(1);
     const ret = await server.call({ to, data });
     return ret;

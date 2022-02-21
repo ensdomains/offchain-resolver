@@ -937,10 +937,10 @@
     ethers "^5.3.1"
     express "^4.17.1"
 
-"@chainlink/ethers-ccip-read-provider@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@chainlink/ethers-ccip-read-provider/-/ethers-ccip-read-provider-0.2.2.tgz#a9b92bea8fa9ec1308d6893b875a86f2f12e248b"
-  integrity sha512-TrZhqyWGTORW+G0+4/Oz0AedZyDyex5TH6q+rzdVATfEeQbAftVZkEXjfO5hNDizqty8Mo8JMi/XmnRds6A3ig==
+"@chainlink/ethers-ccip-read-provider@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@chainlink/ethers-ccip-read-provider/-/ethers-ccip-read-provider-0.2.3.tgz#812d614c9dd3d52b978185305ddf1fb445311065"
+  integrity sha512-0OGdiEmTWw16QMpdL/MzstPc/5FTMtDjsxrOzme+8QZgPJHzyXpzA6WVfvciGGwgPmX1jk8WUg1vSpf8IB5N9A==
   dependencies:
     "@ethersproject/abi" "^5.5.0"
     "@ethersproject/abstract-signer" "^5.5.0"

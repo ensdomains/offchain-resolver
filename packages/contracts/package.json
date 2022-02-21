@@ -18,7 +18,7 @@
     "clean": "rm -fr node_modules artifacts cache"
   },
   "devDependencies": {
-    "@chainlink/ethers-ccip-read-provider": "^0.2.2",
+    "@chainlink/ethers-ccip-read-provider": "^0.2.3",
     "@nomiclabs/hardhat-ethers": "^2.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.4",
