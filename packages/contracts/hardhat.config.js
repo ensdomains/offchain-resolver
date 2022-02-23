@@ -8,7 +8,7 @@ require('hardhat-deploy-ethers');
 
 real_accounts = undefined;
 if(process.env.DEPLOYER_KEY && process.env.OWNER_KEY) {
-  real_accounts = [process.env.DEPLOYER_KEY, process.env.OWNER_KEY];
+  real_accounts = [process.env.OWNER_KEY, process.env.DEPLOYER_KEY];
 }
 const gatewayurl = "https://offchain-resolver-example.uc.r.appspot.com/{sender}/{data}.json"
 /**
@@ -55,10 +55,10 @@ module.exports = {
     apiKey: process.env.ETHERSCAN_API_KEY
   },
   namedAccounts: {
-    deployer: {
+    owner: {
       default: 0,
     },
-    owner: {
+    deployer: {
       default: 1,
     },
   }
