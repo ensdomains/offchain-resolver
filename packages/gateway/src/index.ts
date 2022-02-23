@@ -3,7 +3,6 @@ import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { ethers } from 'ethers';
 import { JSONDatabase } from './json';
-let options: any = {};
 const program = new Command();
 program
   .requiredOption(
@@ -14,7 +13,7 @@ program
   .option('-t --ttl <number>', 'TTL for signatures', '300')
   .option('-p --port <number>', 'Port number to serve on', '8080');
 program.parse(process.argv);
-options = program.opts();
+const options = program.opts();
 let privateKey = options.privateKey;
 if (privateKey.startsWith('@')) {
   privateKey = ethers.utils.arrayify(
