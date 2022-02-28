@@ -8,7 +8,6 @@
     "contracts/*.sol",
     "artifacts/contracts/**/*.json"
   ],
-  "main": "index.js",
   "scripts": {
     "test": "run() { npx hardhat test; }; run",
     "lint": "npx hardhat check",
