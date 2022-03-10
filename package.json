@@ -13,6 +13,8 @@
   ],
   "private": true,
   "scripts": {
+    "start:gateway": "yarn workspace @ensdomains/offchain-resolver-gateway start",
+    "start:client": "yarn workspace @ensdomains/offchain-resolver-client start",
     "test": "yarn workspaces run test",
     "lint": "yarn workspaces run lint",
     "build": "yarn workspaces run build",

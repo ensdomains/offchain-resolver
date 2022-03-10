@@ -28,12 +28,16 @@ python3 -c "import os; import binascii; print('0x%s' % binascii.hexlify(os.urand
 
 For the rest of this demo we will be using the standard test private key `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`.
 
-Next, build and run the gateway:
+First, install dependencies and build all packages:
 
-```
-cd packages/gateway
+```bash
 yarn && yarn build
-yarn start --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
+```
+
+Next, run the gateway:
+
+```bash
+yarn start:gateway --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
 ```
 
 The value for the `--private-key` flag should be the key you generated earlier.
@@ -43,13 +47,12 @@ You will see output similar to the following:
 Serving on port 8000 with signing address 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ```
 
-Take a look at the data in `test.eth.json`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
+Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
 Next, edit `contracts/deploy/10_offchain_resolver.js`; replacing the address on line 9 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
 
 ```
 cd packages/contracts
-yarn
 npx hardhat node
 ```
 
@@ -78,24 +81,22 @@ Take note of the address to which the ENSRegistry was deployed (0x5FbDB...).
 Finally, in a third terminal, run the example client to demonstrate resolving a name:
 
 ```
-cd packages/client
-yarn && yarn build
-yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
-yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
+yarn start:client --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
+yarn start:client --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
 ```
 
 You should see output similar to the following:
 
 ```
-$ yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
+$ yarn start:client --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
 yarn run v1.22.17
-$ node dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
+$ node packages/client/dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
 test.eth: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 Done in 0.28s.
 
-$ yarn start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
+$ yarn start:client --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
 yarn run v1.22.17
-$ node dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
+$ node packages/client/dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
 foo.test.eth: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 Done in 0.23s.
 ```
