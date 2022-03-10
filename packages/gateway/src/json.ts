@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 
 interface NameData {
   addresses?: { [coinType: number]: string };
+  text?: { [key: string]: string };
 }
 
 type ZoneData = { [name: string]: NameData };
@@ -38,6 +39,14 @@ export class JSONDatabase implements Database {
       return { addr: ZERO_ADDRESS, ttl: this.ttl };
     }
     return { addr: nameData.addresses[coinType], ttl: this.ttl };
+  }
+
+  text(name: string, key: string) {
+    const nameData = this.findName(name);
+    if (!nameData || !nameData.text || !nameData.text[key]) {
+      return { value: '', ttl: this.ttl };
+    }
+    return { value: nameData.text[key], ttl: this.ttl };
   }
 
   private findName(name: string) {

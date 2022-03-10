@@ -1,8 +1,9 @@
 import { Server } from '@chainlink/ccip-read-server';
-import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
-import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import { ethers, BytesLike } from 'ethers';
 import { hexConcat, Result } from 'ethers/lib/utils';
+import { ETH_COIN_TYPE } from './utils';
+import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
+import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 
 const Resolver = new ethers.utils.Interface(Resolver_abi);
 
@@ -18,6 +19,10 @@ export interface Database {
     name: string,
     coinType: number
   ): PromiseOrResult<{ addr: string; ttl: number }>;
+  text(
+    name: string,
+    key: string
+  ): PromiseOrResult<{ value: string; ttl: number }>;
 }
 
 function decodeDnsName(dnsname: Buffer) {
@@ -40,12 +45,16 @@ const queryHandlers: {
   ) => Promise<DatabaseResult>;
 } = {
   'addr(bytes32)': async (db, name, _args) => {
-    const { addr, ttl } = await db.addr(name, 42);
+    const { addr, ttl } = await db.addr(name, ETH_COIN_TYPE);
     return { result: [addr], ttl };
   },
   'addr(bytes32,uint256)': async (db, name, args) => {
     const { addr, ttl } = await db.addr(name, args[0]);
     return { result: [addr], ttl };
+  },
+  'text(bytes32,string)': async (db, name, args) => {
+    const { value, ttl } = await db.text(name, args[0]);
+    return { result: [value], ttl };
   },
 };
 

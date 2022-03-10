@@ -10,4 +10,4 @@ module.exports = async ({deployments}) => {
         log: true,
     });
 };
-module.exports.tags = ['ens'];
+module.exports.tags = ['test'];

@@ -1,16 +1,24 @@
 import { JSONDatabase } from '../src/json';
-
+import { ETH_COIN_TYPE } from '../src/utils';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const TEST_DB = {
   '*.eth': {
     addresses: {
-      42: '0x2345234523452345234523452345234523452345',
+      [ETH_COIN_TYPE]: '0x2345234523452345234523452345234523452345',
+    },
+    text: {
+      email: 'info@example.com',
+      description: 'hello offchainresolver record',
     },
   },
   'test.eth': {
     addresses: {
-      42: '0x3456345634563456345634563456345634563456',
+      [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
+    },
+    text: {
+      email: 'info@example.com',
+      description: 'hello offchainresolver record',
     },
   },
 };
@@ -19,35 +27,47 @@ describe('JSONDatabase', () => {
   const db = new JSONDatabase(TEST_DB, 300);
 
   it('returns the zero address for nonexistent names', () => {
-    expect(db.addr('test.test', 42)).toStrictEqual({
+    expect(db.addr('test.test', ETH_COIN_TYPE)).toStrictEqual({
       addr: ZERO_ADDRESS,
       ttl: 300,
     });
   });
 
   it('resolves exact names', () => {
-    expect(db.addr('test.eth', 42)).toStrictEqual({
-      addr: TEST_DB['test.eth'].addresses[42],
+    expect(db.addr('test.eth', ETH_COIN_TYPE)).toStrictEqual({
+      addr: TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
       ttl: 300,
     });
   });
 
   it('resolves wildcards', () => {
-    expect(db.addr('foo.eth', 42)).toStrictEqual({
-      addr: TEST_DB['*.eth'].addresses[42],
+    expect(db.addr('foo.eth', ETH_COIN_TYPE)).toStrictEqual({
+      addr: TEST_DB['*.eth'].addresses[ETH_COIN_TYPE],
+      ttl: 300,
+    });
+  });
+
+  it('resolves text', () => {
+    expect(db.text('foo.eth', 'email')).toStrictEqual({
+      value: TEST_DB['*.eth'].text['email'],
+      ttl: 300,
+    });
+
+    expect(db.text('foo.eth', 'description')).toStrictEqual({
+      value: TEST_DB['*.eth'].text['description'],
       ttl: 300,
     });
   });
 
   it('resolves multiple levels of wildcard', () => {
-    expect(db.addr('bar.foo.eth', 42)).toStrictEqual({
-      addr: TEST_DB['*.eth'].addresses[42],
+    expect(db.addr('bar.foo.eth', ETH_COIN_TYPE)).toStrictEqual({
+      addr: TEST_DB['*.eth'].addresses[ETH_COIN_TYPE],
       ttl: 300,
     });
   });
 
   it('stops when encountering a non-wildcard label', () => {
-    expect(db.addr('blah.test.eth', 42)).toStrictEqual({
+    expect(db.addr('blah.test.eth', ETH_COIN_TYPE)).toStrictEqual({
       addr: ZERO_ADDRESS,
       ttl: 300,
     });

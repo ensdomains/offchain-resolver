@@ -9,17 +9,16 @@ import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { FetchJsonResponse } from '@ethersproject/web';
 import { JSONDatabase } from '../src/json';
 import { makeServer } from '../src/server';
-
+import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
-
 chai.use(chaiAsPromised);
 
 const Resolver = new ethers.utils.Interface(Resolver_abi.abi);
 
 const TEST_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-const TEST_URL = 'http://localhost:8000/rpc/{sender}/{data}.json';
+const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
@@ -68,13 +67,15 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
 const TEST_DB = {
   '*.eth': {
     addresses: {
-      42: '0x2345234523452345234523452345234523452345',
+      [ETH_COIN_TYPE]: '0x2345234523452345234523452345234523452345',
     },
+    text: { email: 'wildcard@example.com' },
   },
   'test.eth': {
     addresses: {
-      42: '0x3456345634563456345634563456345634563456',
+      [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
     },
+    text: { email: 'test@example.com' },
   },
 };
 
@@ -116,7 +117,7 @@ describe('End to end test', () => {
     _processFunc?: (value: any, response: FetchJsonResponse) => any
   ) {
     const [to, data] = (url.match(
-      /http:\/\/localhost:8000\/rpc\/([^/]+)\/([^/]+).json/
+      /http:\/\/localhost:8080\/rpc\/([^/]+)\/([^/]+).json/
     ) as RegExpMatchArray).slice(1);
     const ret = await server.call({ to, data });
     return ret;
@@ -150,7 +151,22 @@ describe('End to end test', () => {
       ]);
       const result = await resolver.resolve(dnsName('test.eth'), callData);
       const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).to.deep.equal([TEST_DB['test.eth'].addresses[42]]);
+      expect(resultData).to.deep.equal([
+        TEST_DB['test.eth'].addresses[ETH_COIN_TYPE],
+      ]);
+    });
+
+    it('resolves calls to text(bytes32,string)', async () => {
+      const callData = Resolver.encodeFunctionData('text(bytes32,string)', [
+        ethers.utils.namehash('test.eth'),
+        'email',
+      ]);
+      const result = await resolver.resolve(dnsName('test.eth'), callData);
+      const resultData = Resolver.decodeFunctionResult(
+        'text(bytes32,string)',
+        result
+      );
+      expect(resultData).to.deep.equal([TEST_DB['test.eth'].text['email']]);
     });
   });
 });

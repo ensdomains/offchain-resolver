@@ -27,7 +27,7 @@ describe('OffchainResolver', function (accounts) {
         signer = await provider.getSigner();
         address = await signer.getAddress();
         const OffchainResolver = await ethers.getContractFactory("OffchainResolver");
-        resolver = await OffchainResolver.deploy("http://localhost:8000/", [signingAddress]);
+        resolver = await OffchainResolver.deploy("http://localhost:8080/", [signingAddress]);
     });
 
     beforeEach(async () => {
