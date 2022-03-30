@@ -1,6 +1,4 @@
 /// <reference types="./ganache-cli" />
-
-import { CCIPReadProvider } from '@chainlink/ethers-ccip-read-provider';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ethers } from 'ethers';
@@ -13,6 +11,24 @@ import { ETH_COIN_TYPE } from '../src/utils';
 import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
 chai.use(chaiAsPromised);
+import {
+  // JsonRpcProvider,
+  BaseProvider,
+  BlockTag,
+  TransactionRequest,
+  Network
+} from '@ethersproject/providers';
+import { fetchJson } from '@ethersproject/web';
+import { Logger } from '@ethersproject/logger';
+import { arrayify, BytesLike, hexlify } from '@ethersproject/bytes';
+
+const logger = new Logger('0.1.0');
+
+export type Fetch = (
+  url: string,
+  json?: string,
+  processFunc?: (value: any, response: FetchJsonResponse) => any
+) => Promise<any>;
 
 const Resolver = new ethers.utils.Interface(Resolver_abi.abi);
 
@@ -23,6 +39,72 @@ const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
   return factory.deploy(...args);
+}
+
+async function handleCall(
+  provider: MockProvider,
+  params: { transaction: TransactionRequest; blockTag?: BlockTag },
+): Promise<{ transaction: TransactionRequest; result: BytesLike }> {
+  let result = await provider.parent.perform('call', params);
+  let bytes = arrayify(result);
+  const response = await sendRPC(provider.fetcher, [TEST_URL], params.transaction.to, bytes);
+  console.log({params, response})
+  return {
+    transaction:params.transaction,
+    result:response
+  }
+}
+
+async function sendRPC(fetcher: Fetch, urls: string[], to: any, callData: BytesLike): Promise<BytesLike> {
+  const processFunc = (value: any, response: FetchJsonResponse) => {
+    return { body: value, status: response.statusCode };
+  };
+
+  const args = { sender: hexlify(to), data: hexlify(callData) };
+  for (let template of urls) {
+    const url = template.replace(/\{([^}]*)\}/g, (_match, p1: keyof typeof args) => args[p1]);
+    const data = await fetcher(url, template.includes('{data}') ? undefined : JSON.stringify(args), processFunc);
+    if (data.status >= 400 && data.status <= 499) {
+      return logger.throwError('bad response', Logger.errors.SERVER_ERROR, {
+        status: data.status,
+        name: data.body.message,
+      });
+    }
+    if (data.status >= 200 && data.status <= 299) {
+      return data.body.data;
+    }
+    logger.warn('Server returned an error', url, to, callData, data.status, data.body.message);
+  }
+  return logger.throwError('All gateways returned an error', Logger.errors.SERVER_ERROR, { urls, to, callData });
+}
+
+export class MockProvider extends BaseProvider {
+  readonly parent: BaseProvider;
+  readonly fetcher: Fetch;
+
+  /**
+   * Constructor.
+   * @param provider: The Ethers provider to wrap.
+   */
+   constructor(provider: BaseProvider, fetcher: Fetch = fetchJson) {
+    super(1337);
+    this.parent = provider;
+    this.fetcher = fetcher;
+  }
+
+  async perform(method: string, params: any): Promise<any> {
+    switch (method) {
+      case 'call':
+        const { result } = await handleCall(this, params);
+        return result;
+      default:
+        return this.parent.perform(method, params);
+    }
+  }
+
+  detectNetwork(): Promise<Network> {
+    return this.parent.detectNetwork();
+  }
 }
 
 /**
@@ -126,7 +208,7 @@ describe('End to end test', () => {
   const baseProvider = new ethers.providers.Web3Provider(ganache.provider());
   const signer = baseProvider.getSigner();
   const proxyMiddleware = new RevertNormalisingMiddleware(baseProvider);
-  const ccipProvider = new CCIPReadProvider(proxyMiddleware, fetcher);
+  const mockProvider = new MockProvider(proxyMiddleware, fetcher);
 
   let resolver: ethers.Contract;
   let snapshot: number;
@@ -136,7 +218,7 @@ describe('End to end test', () => {
       await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [
         signerAddress,
       ])
-    ).connect(ccipProvider);
+    ).connect(mockProvider);
     snapshot = await baseProvider.send('evm_snapshot', []);
   });
 
