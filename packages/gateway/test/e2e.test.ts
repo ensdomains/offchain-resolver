@@ -116,6 +116,21 @@ export class MockProvider extends BaseProvider {
   }
 }
 
+interface RevertError {
+  error: {
+    hashes: string[]
+    results: {
+      [name: string]:{
+        return: string
+      }
+    }
+  };
+}
+
+function isRevertError(e: any): e is RevertError {
+  return typeof e?.error?.hashes[0] === "string";
+}
+
 /**
  * Hack to ensure that revert data gets passed back from test nodes the same way as from real nodes.
  * This middleware catches Ganache's custom revert error and returns it as response data instead.
@@ -138,8 +153,12 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
         try {
           return await this.parent.perform(method, params);
         } catch (e) {
-          if (e.error.hashes !== undefined && e.error.hashes.length > 0) {
-            return e.error.results[e.error.hashes[0]].return;
+          if(isRevertError(e)){
+            const error = e.error as any
+            const hash = error.hashes[0]
+            if (error.hashes !== undefined && error.hashes.length > 0) {
+              return error.results[hash].return;
+            }  
           }
           throw e;
         }
