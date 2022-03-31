@@ -118,17 +118,17 @@ export class MockProvider extends BaseProvider {
 
 interface RevertError {
   error: {
-    hashes: string[]
+    hashes: string[];
     results: {
-      [name: string]:{
-        return: string
-      }
-    }
+      [name: string]: {
+        return: string;
+      };
+    };
   };
 }
 
 function isRevertError(e: any): e is RevertError {
-  return typeof e?.error?.hashes[0] === "string";
+  return typeof e?.error?.hashes[0] === 'string';
 }
 
 /**
@@ -153,12 +153,12 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
         try {
           return await this.parent.perform(method, params);
         } catch (e) {
-          if(isRevertError(e)){
-            const error = e.error as any
-            const hash = error.hashes[0]
+          if (isRevertError(e)) {
+            const error = e.error as any;
+            const hash = error.hashes[0];
             if (error.hashes !== undefined && error.hashes.length > 0) {
               return error.results[hash].return;
-            }  
+            }
           }
           throw e;
         }
