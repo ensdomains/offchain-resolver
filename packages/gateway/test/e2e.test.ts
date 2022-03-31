@@ -36,6 +36,11 @@ const TEST_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 
+const CCIP_READ_INTERFACE = new ethers.utils.Interface([
+  'error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData)',
+  'function callback(bytes memory result, bytes memory extraData)',
+]);
+
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
   return factory.deploy(...args);
@@ -47,8 +52,8 @@ async function handleCall(
 ): Promise<{ transaction: TransactionRequest; result: BytesLike }> {
   let result = await provider.parent.perform('call', params);
   let bytes = arrayify(result);
-  const response = await sendRPC(provider.fetcher, [TEST_URL], params.transaction.to, bytes);
-  console.log({params, response})
+  const { urls, callData } = CCIP_READ_INTERFACE.decodeErrorResult('OffchainLookup', bytes);
+  const response = await sendRPC(provider.fetcher, urls, params.transaction.to, callData);
   return {
     transaction:params.transaction,
     result:response
@@ -128,10 +133,9 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
       case 'call':
         try {
           return await this.parent.perform(method, params);
-        } catch (e) {
-          const err = e as any;
-          if (err.hashes !== undefined && err.hashes.length > 0) {
-            return err.results[err.hashes[0]].return;
+        } catch (e:any) {
+          if (e.error.hashes !== undefined && e.error.hashes.length > 0) {
+            return e.error.results[e.error.hashes[0]].return;
           }
           throw e;
         }
