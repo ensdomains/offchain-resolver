@@ -6,17 +6,17 @@ program
   .requiredOption('-r --registry <address>', 'ENS registry address')
   .option('-p --provider <url>', 'web3 provider URL', 'http://localhost:8545/')
   .option('-i --chainId <chainId>', 'chainId', '31337')
-  .option('-n --name <name>', 'name', 'unknown')
+  .option('-n --chainName <name>', 'chainName', 'unknown')
   .argument('<name>');
 
 program.parse(process.argv);
 const options = program.opts();
 const ensAddress = options.registry;
 const chainId = parseInt(options.chainId);
-const name = options.name;
+const chainName = options.chainName;
 const provider = new ethers.providers.JsonRpcProvider(options.provider, {
   chainId,
-  name,
+  name: chainName,
   ensAddress,
 });
 (async () => {
