@@ -12,17 +12,13 @@ import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolver
 import OffchainResolver_abi from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
 chai.use(chaiAsPromised);
 import {
-  // JsonRpcProvider,
   BaseProvider,
   BlockTag,
   TransactionRequest,
   Network
 } from '@ethersproject/providers';
 import { fetchJson } from '@ethersproject/web';
-import { Logger } from '@ethersproject/logger';
 import { arrayify, BytesLike, hexlify } from '@ethersproject/bytes';
-
-const logger = new Logger('0.1.0');
 
 export type Fetch = (
   url: string,
@@ -36,52 +32,13 @@ const TEST_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
 
-const CCIP_READ_INTERFACE = new ethers.utils.Interface([
-  'error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData)',
-  'function callback(bytes memory result, bytes memory extraData)',
-]);
+const CCIP_READ_INTERFACE = new ethers.utils.Interface(OffchainResolver_abi.abi);
 
 function deploySolidity(data: any, signer: ethers.Signer, ...args: any[]) {
   const factory = ethers.ContractFactory.fromSolidity(data, signer);
   return factory.deploy(...args);
 }
 
-async function handleCall(
-  provider: MockProvider,
-  params: { transaction: TransactionRequest; blockTag?: BlockTag },
-): Promise<{ transaction: TransactionRequest; result: BytesLike }> {
-  let result = await provider.parent.perform('call', params);
-  let bytes = arrayify(result);
-  const { urls, callData } = CCIP_READ_INTERFACE.decodeErrorResult('OffchainLookup', bytes);
-  const response = await sendRPC(provider.fetcher, urls, params.transaction.to, callData);
-  return {
-    transaction:params.transaction,
-    result:response
-  }
-}
-
-async function sendRPC(fetcher: Fetch, urls: string[], to: any, callData: BytesLike): Promise<BytesLike> {
-  const processFunc = (value: any, response: FetchJsonResponse) => {
-    return { body: value, status: response.statusCode };
-  };
-
-  const args = { sender: hexlify(to), data: hexlify(callData) };
-  for (let template of urls) {
-    const url = template.replace(/\{([^}]*)\}/g, (_match, p1: keyof typeof args) => args[p1]);
-    const data = await fetcher(url, template.includes('{data}') ? undefined : JSON.stringify(args), processFunc);
-    if (data.status >= 400 && data.status <= 499) {
-      return logger.throwError('bad response', Logger.errors.SERVER_ERROR, {
-        status: data.status,
-        name: data.body.message,
-      });
-    }
-    if (data.status >= 200 && data.status <= 299) {
-      return data.body.data;
-    }
-    logger.warn('Server returned an error', url, to, callData, data.status, data.body.message);
-  }
-  return logger.throwError('All gateways returned an error', Logger.errors.SERVER_ERROR, { urls, to, callData });
-}
 
 export class MockProvider extends BaseProvider {
   readonly parent: BaseProvider;
@@ -91,7 +48,7 @@ export class MockProvider extends BaseProvider {
    * Constructor.
    * @param provider: The Ethers provider to wrap.
    */
-   constructor(provider: BaseProvider, fetcher: Fetch = fetchJson) {
+  constructor(provider: BaseProvider, fetcher: Fetch = fetchJson) {
     super(1337);
     this.parent = provider;
     this.fetcher = fetcher;
@@ -100,11 +57,37 @@ export class MockProvider extends BaseProvider {
   async perform(method: string, params: any): Promise<any> {
     switch (method) {
       case 'call':
-        const { result } = await handleCall(this, params);
+        const { result } = await this.handleCall(this, params);
         return result;
       default:
         return this.parent.perform(method, params);
     }
+  }
+
+  async handleCall(
+    provider: MockProvider,
+    params: { transaction: TransactionRequest; blockTag?: BlockTag },
+  ): Promise<{ transaction: TransactionRequest; result: BytesLike }> {
+    let result = await provider.parent.perform('call', params);
+    let bytes = arrayify(result);
+    const { urls, callData } = CCIP_READ_INTERFACE.decodeErrorResult('OffchainLookup', bytes);
+    const response = await this.sendRPC(provider.fetcher, urls, params.transaction.to, callData);
+    return {
+      transaction:params.transaction,
+      result:response
+    }
+  }
+  
+  async sendRPC(fetcher: Fetch, urls: string[], to: any, callData: BytesLike): Promise<BytesLike> {
+    const processFunc = (value: any, response: FetchJsonResponse) => {
+      return { body: value, status: response.statusCode };
+    };
+  
+    const args = { sender: hexlify(to), data: hexlify(callData) };
+    const template = urls[0]
+    const url = template.replace(/\{([^}]*)\}/g, (_match, p1: keyof typeof args) => args[p1]);
+    const data = await fetcher(url, template.includes('{data}') ? undefined : JSON.stringify(args), processFunc);
+    return data.body.data;
   }
 
   detectNetwork(): Promise<Network> {
