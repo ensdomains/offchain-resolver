@@ -37,7 +37,7 @@ const provider = new ethers.providers.JsonRpcProvider(options.provider, {
       btcAddress = formatsByCoinType[coinType].encoder(buffer);
     }
     console.log(`resolver address ${resolver.address}`);
-    console.log(`address ${resolveName}`);
+    console.log(`eth address ${resolveName}`);
     console.log(`btc address ${btcAddress}`);
   } else {
     console.log('no resolver found');
