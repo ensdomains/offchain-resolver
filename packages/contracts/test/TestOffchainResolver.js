@@ -1,4 +1,3 @@
-const { CCIPReadProvider } = require("@chainlink/ethers-ccip-read-provider");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const namehash = require('eth-ens-namehash');
@@ -7,7 +6,7 @@ const { defaultAbiCoder, SigningKey, arrayify, hexConcat } = require("ethers/lib
 const TEST_ADDRESS = "0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe";
 
 describe('OffchainResolver', function (accounts) {
-    let provider, signer, address, resolver, snapshot, signingKey, signingAddress;
+    let signer, address, resolver, snapshot, signingKey, signingAddress;
 
     async function fetcher(url, json) {
         console.log({url, json});
@@ -23,8 +22,7 @@ describe('OffchainResolver', function (accounts) {
     before(async () => {
         signingKey = new SigningKey(ethers.utils.randomBytes(32));
         signingAddress = ethers.utils.computeAddress(signingKey.privateKey);
-        provider = new CCIPReadProvider(ethers.provider, fetcher);
-        signer = await provider.getSigner();
+        signer = await ethers.provider.getSigner();
         address = await signer.getAddress();
         const OffchainResolver = await ethers.getContractFactory("OffchainResolver");
         resolver = await OffchainResolver.deploy("http://localhost:8080/", [signingAddress]);
