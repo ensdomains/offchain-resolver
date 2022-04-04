@@ -30,7 +30,6 @@ const provider = new ethers.providers.JsonRpcProvider(options.provider, {
     const btcData = await resolver._fetchBytes('0xf1cb7e06', encodedCoinType)
     if(btcData){
       let buffer = Buffer.from(btcData.slice(2), "hex")
-      console.log({buffer, btcData})
       btcAddress = formatsByCoinType[0].encoder(buffer);
     }
     console.log(`resolver address ${resolver.address}`);
