@@ -4,11 +4,13 @@ import { readFileSync } from 'fs';
 interface NameData {
   addresses?: { [coinType: number]: string };
   text?: { [key: string]: string };
+  contenthash?: string;
 }
 
 type ZoneData = { [name: string]: NameData };
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const EMPTY_CONTENT_HASH = '0x';
 
 export class JSONDatabase implements Database {
   data: ZoneData;
@@ -47,6 +49,14 @@ export class JSONDatabase implements Database {
       return { value: '', ttl: this.ttl };
     }
     return { value: nameData.text[key], ttl: this.ttl };
+  }
+
+  contenthash(name: string) {
+    const nameData = this.findName(name);
+    if (!nameData || !nameData.contenthash) {
+      return { contenthash: EMPTY_CONTENT_HASH, ttl: this.ttl };
+    }
+    return { contenthash: nameData.contenthash, ttl: this.ttl };
   }
 
   private findName(name: string) {

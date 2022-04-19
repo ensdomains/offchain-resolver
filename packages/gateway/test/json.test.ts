@@ -1,6 +1,7 @@
 import { JSONDatabase } from '../src/json';
 import { ETH_COIN_TYPE } from '../src/utils';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const EMPTY_CONTENT_HASH = '0x';
 
 const TEST_DB = {
   '*.eth': {
@@ -11,6 +12,7 @@ const TEST_DB = {
       email: 'info@example.com',
       description: 'hello offchainresolver record',
     },
+    contenthash: 'ipfs://QmTeW79w7QQ6Npa3b1d5tANreCDxF2iDaAPsDvW6KtLmfB',
   },
   'test.eth': {
     addresses: {
@@ -55,6 +57,20 @@ describe('JSONDatabase', () => {
 
     expect(db.text('foo.eth', 'description')).toStrictEqual({
       value: TEST_DB['*.eth'].text['description'],
+      ttl: 300,
+    });
+  });
+
+  it('resolves content', () => {
+    expect(db.contenthash('foo.eth')).toStrictEqual({
+      contenthash: TEST_DB['*.eth'].contenthash,
+      ttl: 300,
+    });
+  });
+
+  it('resolves empty contenthash when no contenthash is set', () => {
+    expect(db.contenthash('test.eth')).toStrictEqual({
+      contenthash: EMPTY_CONTENT_HASH,
       ttl: 300,
     });
   });
