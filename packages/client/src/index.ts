@@ -1,6 +1,5 @@
 import { Command } from 'commander';
 import ethers from 'ethers';
-// import { formatsByCoinType } from '@ensdomains/address-encoder';
 
 const program = new Command();
 program
