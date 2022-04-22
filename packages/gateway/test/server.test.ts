@@ -16,12 +16,16 @@ const TEST_DB = {
       [ETH_COIN_TYPE]: '0x2345234523452345234523452345234523452345',
     },
     text: { email: 'wildcard@example.com' },
+    contenthash:
+      '0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe',
   },
   'test.eth': {
     addresses: {
       [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
     },
     text: { email: 'test@example.com' },
+    contenthash:
+      '0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162',
   },
 };
 
@@ -213,6 +217,36 @@ describe('makeServer', () => {
       expect(response).toStrictEqual({
         status: 200,
         result: Resolver.encodeFunctionResult('text(bytes32,string)', ['']),
+      });
+    });
+  });
+
+  describe('contenthash(bytes32)', () => {
+    it('resolves exact names', async () => {
+      const response = await makeCall('contenthash(bytes32)', 'test.eth');
+      expect(response).toStrictEqual({
+        status: 200,
+        result: Resolver.encodeFunctionResult('contenthash(bytes32)', [
+          TEST_DB['test.eth'].contenthash,
+        ]),
+      });
+    });
+
+    it('resolves wildcard names', async () => {
+      const response = await makeCall('contenthash(bytes32)', 'foo.eth');
+      expect(response).toStrictEqual({
+        status: 200,
+        result: Resolver.encodeFunctionResult('contenthash(bytes32)', [
+          TEST_DB['*.eth'].contenthash,
+        ]),
+      });
+    });
+
+    it('resolves nonexistent names', async () => {
+      const response = await makeCall('contenthash(bytes32)', 'test.test');
+      expect(response).toStrictEqual({
+        status: 200,
+        result: Resolver.encodeFunctionResult('contenthash(bytes32)', ['0x']),
       });
     });
   });
