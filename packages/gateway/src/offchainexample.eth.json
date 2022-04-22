@@ -7,7 +7,8 @@
         "text": {
             "email": "vitalik@ethereum.org",
             "description": "hello offchainresolver record"
-        }
+        },
+        "contenthash": "0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe"
     },
     "*.offchainexample.eth": {
         "addresses": {
@@ -18,6 +19,7 @@
         "text": {
             "email": "nick@ens.domains",
             "description": "hello offchainresolver wildcard record"
-        }
+        },
+        "contenthash": "0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe"
     }
 }
