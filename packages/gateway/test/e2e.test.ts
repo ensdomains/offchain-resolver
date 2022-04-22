@@ -185,6 +185,8 @@ const TEST_DB = {
       [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
     },
     text: { email: 'test@example.com' },
+    contenthash:
+      '0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162',
   },
 };
 
@@ -276,6 +278,17 @@ describe('End to end test', () => {
         result
       );
       expect(resultData).to.deep.equal([TEST_DB['test.eth'].text['email']]);
+    });
+    it('resolves calls to contenthash(bytes32)', async () => {
+      const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
+        ethers.utils.namehash('test.eth'),
+      ]);
+      const result = await resolver.resolve(dnsName('test.eth'), callData);
+      const resultData = Resolver.decodeFunctionResult(
+        'contenthash(bytes32)',
+        result
+      );
+      expect(resultData).to.deep.equal([TEST_DB['test.eth'].contenthash]);
     });
   });
 });
