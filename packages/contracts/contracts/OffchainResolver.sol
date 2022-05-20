@@ -16,16 +16,40 @@ interface IResolverService {
 contract OffchainResolver is IExtendedResolver, SupportsInterface {
     string public url;
     mapping(address=>bool) public signers;
+    address public owner;
 
-    event NewSigners(address[] signers);
+    event AddedSigner(address signers);
+    event RemovedSigner(address signers);
+    event UpdatedOwner(address owner);
     error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData);
 
-    constructor(string memory _url, address[] memory _signers) {
+    constructor(string memory _url, address[] memory _signers, address _owner) {
         url = _url;
         for(uint i = 0; i < _signers.length; i++) {
             signers[_signers[i]] = true;
+            emit AddedSigner(_signers[i]);
         }
-        emit NewSigners(_signers);
+        owner = _owner;
+        emit UpdatedOwner(_owner);
+    }
+
+    function updateOwner(address newOwner) public onlyOwner {
+        owner = newOwner;
+        emit UpdatedOwner(newOwner);
+    }
+
+    function addSigner(address signer) public onlyOwner {
+        signers[signer] = true;
+        emit AddedSigner(signer);
+    }
+
+    function isSigner(address signer) public view returns(bool){
+        return signers[signer];
+    }
+
+    function removeSigner(address signer) public onlyOwner {
+        signers[signer] = false;
+        emit RemovedSigner(signer);
     }
 
     function makeSignatureHash(address target, uint64 expires, bytes memory request, bytes memory result) external pure returns(bytes32) {
@@ -64,5 +88,10 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
 
     function supportsInterface(bytes4 interfaceID) public pure override returns(bool) {
         return interfaceID == type(IExtendedResolver).interfaceId || super.supportsInterface(interfaceID);
+    }
+
+    modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
     }
 }

@@ -1,11 +1,11 @@
 {
-    "test.eth": {
+    "celo.eth": {
         "addresses": {
-            "60": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+            "60": "0x883bEA599F0a48A69eCDf86ceAD733Afd31F77e0"
         },
         "text":{ "email": "test@example.com" }
     },
-    "*.test.eth": {
+    "*.celo.eth": {
         "addresses": {
             "60": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
         },

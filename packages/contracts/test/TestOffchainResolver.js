@@ -6,7 +6,8 @@ const { defaultAbiCoder, SigningKey, arrayify, hexConcat } = require("ethers/lib
 const TEST_ADDRESS = "0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe";
 
 describe('OffchainResolver', function (accounts) {
-    let signer, address, resolver, snapshot, signingKey, signingAddress;
+    let signer, owner, addr1, resolver, snapshot, signingKey, signingAddress, resultData
+    let sig, sig2, expires, iface, callData;
 
     async function fetcher(url, json) {
         console.log({url, json});
@@ -22,10 +23,29 @@ describe('OffchainResolver', function (accounts) {
     before(async () => {
         signingKey = new SigningKey(ethers.utils.randomBytes(32));
         signingAddress = ethers.utils.computeAddress(signingKey.privateKey);
+        signingKey2 = new SigningKey(ethers.utils.randomBytes(32));
+        signingAddress2 = ethers.utils.computeAddress(signingKey2.privateKey);
         signer = await ethers.provider.getSigner();
-        address = await signer.getAddress();
+        [owner, addr1] = await ethers.getSigners();
         const OffchainResolver = await ethers.getContractFactory("OffchainResolver");
-        resolver = await OffchainResolver.deploy("http://localhost:8080/", [signingAddress]);
+        resolver = await OffchainResolver.deploy("http://localhost:8080/", [signingAddress], owner.address);
+
+        expires = Math.floor(Date.now() / 1000 + 3600);
+        // Encode the nested call to 'addr'
+        iface = new ethers.utils.Interface(["function addr(bytes32) returns(address)"]);
+        const addrData = iface.encodeFunctionData("addr", [namehash.hash('test.eth')]);
+
+        // Encode the outer call to 'resolve'
+        callData = resolver.interface.encodeFunctionData("resolve", [dnsName('test.eth'), addrData]);
+        // Encode the result data
+        resultData = iface.encodeFunctionResult("addr", [TEST_ADDRESS]);
+
+        // Generate a signature hash for the response from the gateway
+        const callDataHash = await resolver.makeSignatureHash(resolver.address, expires, callData, resultData);
+
+        // Sign it
+        sig = signingKey.signDigest(callDataHash);
+        sig2 = signingKey2.signDigest(callDataHash);
     });
 
     beforeEach(async () => {
@@ -53,26 +73,10 @@ describe('OffchainResolver', function (accounts) {
     });
 
     describe('resolveWithProof()', async () => {
-        let name, expires, iface, callData, resultData, sig;
+        let name;
 
         before(async () => {
             name = 'test.eth';
-            expires = Math.floor(Date.now() / 1000 + 3600);
-            // Encode the nested call to 'addr'
-            iface = new ethers.utils.Interface(["function addr(bytes32) returns(address)"]);
-            const addrData = iface.encodeFunctionData("addr", [namehash.hash('test.eth')]);
-
-            // Encode the outer call to 'resolve'
-            callData = resolver.interface.encodeFunctionData("resolve", [dnsName('test.eth'), addrData]);
-
-            // Encode the result data
-            resultData = iface.encodeFunctionResult("addr", [TEST_ADDRESS]);
-
-            // Generate a signature hash for the response from the gateway
-            const callDataHash = await resolver.makeSignatureHash(resolver.address, expires, callData, resultData);
-
-            // Sign it
-            sig = signingKey.signDigest(callDataHash);
         })
 
         it('resolves an address given a valid signature', async () => {
@@ -101,6 +105,52 @@ describe('OffchainResolver', function (accounts) {
             const response = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, Math.floor(Date.now() / 1000 - 1), hexConcat([sig.r, sig._vs])]);
 
             // Call the function with the request and response
+            await expect(resolver.resolveWithProof(response, callData)).to.be.reverted;
+        });
+    });
+
+    describe('updateOwner()', async () => {
+        it('reverts if not current owner', async () => {
+            await expect(resolver.connect(addr1).updateOwner(addr1.address)).to.be.reverted;
+        });
+
+        it('changes owner successfully', async () => {
+            await resolver.connect(owner).updateOwner(addr1.address);
+            // Confirm that original owner is not still owner
+            await expect(resolver.connect(owner).updateOwner(addr1.address)).to.be.reverted;
+        });
+    });
+
+    describe('addSigner()', async () => {
+        it('reverts if not current owner', async () => {
+            await expect(resolver.connect(addr1).addSigner(addr1.address)).to.be.reverted;
+        });
+
+        it('adds Signer if called by owner', async () => {
+            expect(await resolver.isSigner(signingAddress2)).to.be.false;
+            await resolver.connect(owner).addSigner(signingAddress2);
+            expect(await resolver.isSigner(signingAddress2)).to.be.true;
+
+            // Signer2 can now be used
+            const response = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, hexConcat([sig2.r, sig2._vs])]);
+            const [result] = iface.decodeFunctionResult("addr", await resolver.resolveWithProof(response, callData));
+            expect(result).to.equal(TEST_ADDRESS);
+        });
+    });
+
+    describe('removeSigner()', async () => {
+        it('reverts if not current owner', async () => {
+            await expect(resolver.connect(addr1).removeSigner(addr1.address)).to.be.reverted;
+        });
+
+        it('removes Signer if called by owner', async () => {
+            await resolver.connect(owner).addSigner(signingAddress2);
+            expect(await resolver.isSigner(signingAddress2)).to.be.true;
+            await resolver.connect(owner).removeSigner(signingAddress2);
+            expect(await resolver.isSigner(signingAddress2)).to.be.false;
+
+            // Signer2 can not be used
+            const response = defaultAbiCoder.encode(['bytes', 'uint64', 'bytes'], [resultData, expires, hexConcat([sig2.r, sig2._vs])]);
             await expect(resolver.resolveWithProof(response, callData)).to.be.reverted;
         });
     });
