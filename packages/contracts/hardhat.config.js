@@ -20,6 +20,7 @@ module.exports = {
   networks: {
     hardhat: {
       throwOnCallFailures: false,
+      chainId: 1337,
       gatewayurl:'http://localhost:8080/{sender}/{data}.json',
     },
     ropsten: {
