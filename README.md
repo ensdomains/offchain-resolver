@@ -49,7 +49,7 @@ Serving on port 8000 with signing address 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
-Next, edit `contracts/deploy/10_offchain_resolver.js`; replacing the address on line 9 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
+Next, edit `packages/contracts/hardhat.config.js`; replacing the address on line 59 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
 
 ```
 cd packages/contracts
