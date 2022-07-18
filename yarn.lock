@@ -982,10 +982,10 @@
   dependencies:
     "@nomiclabs/hardhat-truffle5" "^2.0.0"
 
-"@ensdomains/ens-contracts@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@ensdomains/ens-contracts/-/ens-contracts-0.0.8.tgz#883a280956468ea7b38f2694e5f0cc2711843431"
-  integrity sha512-krSovhDB0udRknzwK1bj2aLXM6E58jWDi+/Kw9KzVGpLsXv3im+KODJfGbCi39L+EeoVTYcDEmfV9NQ+l367EA==
+"@ensdomains/ens-contracts@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@ensdomains/ens-contracts/-/ens-contracts-0.0.12.tgz#590a046d9ee1dd43594dcd09c40ef61790a14e5b"
+  integrity sha512-s6CCX/IsEF9R+dHb1vNLDPUAes07zvQFBIavXBest6Li8z1KFuFS+C+AlSA16SYtZ3LQieIBshzJgygYPM9Zog==
   dependencies:
     "@ensdomains/buffer" "^0.0.13"
     "@ensdomains/solsha1" "0.0.3"

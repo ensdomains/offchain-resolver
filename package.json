@@ -20,5 +20,8 @@
     "build": "yarn workspaces run build",
     "docs": "typedoc --entryPointStrategy packages packages/server packages/ethers-ccip-read-provider",
     "clean": "rm -fr node_modules && yarn workspaces run clean"
+  },
+  "dependencies": {
+    "@ensdomains/ens-contracts": "^0.0.12"
   }
 }

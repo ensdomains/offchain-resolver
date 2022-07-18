@@ -16,12 +16,25 @@ const gatewayurl = "https://offchain-resolver-example.uc.r.appspot.com/{sender}/
  */
 
 module.exports = {
-  solidity: "0.8.10",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 10000,
+          },
+        },
+      },
+    ],
+  },
   networks: {
     hardhat: {
       throwOnCallFailures: false,
       chainId: 1337,
       gatewayurl:'http://localhost:8080/{sender}/{data}.json',
+      batchgatewayurl: 'http://localhost:8081/{sender}/{data}.json',
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_ID}`,
