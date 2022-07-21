@@ -34,26 +34,37 @@ First, install dependencies and build all packages:
 yarn && yarn build
 ```
 
-Next, run the gateway:
+Clone [`ccip-read`](https://github.com/smartcontractkit/ccip-read) somewhere outside of this repo and checkout to the `mdt/cf-worker` branch
 
+Build the repo via `yarn build`
+
+Then, symlink the package with;
 ```bash
-yarn start:gateway --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --data test.eth.json
+cd packages/server && yarn link
 ```
 
-The value for the `--private-key` flag should be the key you generated earlier.
+Go back to the `offchain-resolver` root folder and call;
+```
+cd packages/gateway && yarn link "@chainlink/ccip-read-server" && cd ../..
+```
 
-You will see output similar to the following:
-```
-Serving on port 8000 with signing address 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-```
+<br/>
+
+[Follow here](#running-locally) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )
+<br/><br/>
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
-Next, edit `packages/contracts/hardhat.config.js`; replacing the address on line 59 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
+Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 64` with the one output when you ran the command above. 
 
-```
-cd packages/contracts
-npx hardhat node
+Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
+
+```bash
+# If local cloudflare worker will be used
+yarn start:node
+# If remote cloudflare worker url will be used as gateway use the script below instead
+export REMOTE_GATEWAY=https://offchain-gateway.ensdomains.workers.dev
+yarn start:node
 ```
 
 You will see output similar to the following:
@@ -91,13 +102,19 @@ You should see output similar to the following:
 $ yarn start:client --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
 yarn run v1.22.17
 $ node packages/client/dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 test.eth
-test.eth: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+resolver address 0x8464135c8F25Da09e49BC8782676a84730C318bC
+eth address 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+content null
+email test@example.com
 Done in 0.28s.
 
 $ yarn start:client --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
 yarn run v1.22.17
 $ node packages/client/dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
-foo.test.eth: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+resolver address 0x8464135c8F25Da09e49BC8782676a84730C318bC
+eth address 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+content null
+email wildcard@example.com
 Done in 0.23s.
 ```
 
@@ -112,3 +129,24 @@ There are 5 main steps to using this in production:
  3. Start up a gateway server using your name database and a signing key. Publish it on a publicly-accessible URL.
  4. Deploy `OffchainResolver` to Ethereum, providing it with the gateway URL and list of signing key addresses.
  5. Set the newly deployed resolver as the resolver for one or more ENS names.
+
+## Cloudflare Worker development
+
+### Running locally
+
+1. Create a `dev.vars` file under `packages/gateway/` folder
+2. Put gateway private key into it in between double quotes, as below;
+```
+OG_PRIVATE_KEY="PRIVATE_KEY_HERE"
+```
+3. Run worker with `wrangler dev --local` command
+
+### Deployment
+
+1. Register private key as a worker [secret](https://developers.cloudflare.com/workers/platform/environment-variables/#adding-secrets-via-wrangler).
+```bash
+# wrangler secret put <key> <value>
+wrangler secret put OG_PRIVATE_KEY PRIVATE_KEY_HERE
+```
+2. Build the gateway via `yarn build`
+3. Deploy the worker with `wrangler publish`

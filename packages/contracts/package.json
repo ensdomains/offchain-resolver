@@ -11,6 +11,7 @@
   "scripts": {
     "test": "run() { npx hardhat test; }; run",
     "lint": "npx hardhat check",
+    "start": "npx hardhat node",
     "build": "npx hardhat compile",
     "prepublishOnly": "yarn build",
     "pub": "yarn publish --access public",
