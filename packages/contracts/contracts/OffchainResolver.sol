@@ -57,6 +57,10 @@ contract OffchainResolver is IExtendedResolver, ERC165, OffchainMulticallable {
         );
     }
 
+    function foo(uint one) public pure returns(uint){
+        return one;
+    }
+
     /**
      * Callback used by CCIP read compatible clients to verify and parse the response.
      */
