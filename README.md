@@ -163,6 +163,7 @@ The batch client and gateway go through the following sequence.
 
 - Make batch gateway deployable
 - Handle partial failure
+- Fix lint errors
 
 ## Real-world usage
 
