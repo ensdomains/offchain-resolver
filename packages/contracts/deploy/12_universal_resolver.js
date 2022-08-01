@@ -4,7 +4,6 @@ module.exports = async ({getNamedAccounts, deployments, network}) => {
     const {deploy} = deployments;
     const {deployer, signer} = await getNamedAccounts();
     const registry = await ethers.getContract('ENSRegistry');
-    console.log('***registry', registry.address);
     await deploy('UniversalResolver', {
         from: deployer,
         args: [registry.address],

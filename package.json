@@ -7,7 +7,10 @@
   "author": "Nick Johnson <arachnid@notdot.net>",
   "license": "MIT",
   "workspaces": [
-    "packages/batchclient"
+    "packages/batchclient",
+    "packages/batchgateway",
+    "packages/client",
+    "packages/gateway"
   ],
   "private": true,
   "scripts": {
