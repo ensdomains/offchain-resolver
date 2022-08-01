@@ -153,7 +153,7 @@ The batch client and gateway go through the following sequence.
 - Encode `resolver(dnsname, addrData)` into `callData`
 - Combine `callData` into the array of `callDatas`
 - Call `offchainResolver.multicall(callDatas)`
-- Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` as callData
+- Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` with callData and each gateway url
 - Call the gateway server
 - The batch gateway server decodes `Gateway.query(callDatas)` and call each gateway server in parallel
 - Once the client receive the response, decode in the order of `Gateway.query` -> `ResolverService.resolve` -> `Resolver.addr(node, cointype)`
