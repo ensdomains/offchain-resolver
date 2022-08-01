@@ -5,11 +5,12 @@ import { abi as UniversalResolver_abi } from '@ensdomains/ens-contracts/artifact
 import { abi as OffchainResolver_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/OffchainResolver.json';
 import { abi as Gateway_abi } from '@ensdomains/ens-contracts/artifacts/contracts/utils/OffchainMulticallable.sol/BatchGateway.json';
 import { abi as IResolverService_abi } from '@ensdomains/offchain-resolver-contracts/artifacts/contracts/OffchainResolver.sol/IResolverService.json';
-const IResolverService = new ethers.utils.Interface(IResolverService_abi);
+import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
 import fetch from 'cross-fetch';
 
+const IResolverService = new ethers.utils.Interface(IResolverService_abi);
+
 function getDnsName(name: string) {
-  // strip leading and trailing .
   const n = name.replace(/^\.|\.$/gm, '');
 
   var bufLen = n === '' ? 1 : n.length + 2;
@@ -74,18 +75,11 @@ const provider = new ethers.providers.JsonRpcProvider(options.provider, {
       OffchainResolver_abi,
       provider
     )
-    const iface = new ethers.utils.Interface(
-      [
-        "function addr(bytes32) returns(address)",
-        "function addr(bytes32,uint256) returns(bytes)",
-        "function resolve(bytes,bytes) returns(bytes,uint64,bytes)",
-        "function multicall(bytes[])"
-      ]
-    );
+    const iface = new ethers.utils.Interface(Resolver_abi);
     const coinTypes = [60,0];
     const callDatas = coinTypes.map(coinType => {
       const addrData = iface.encodeFunctionData("addr(bytes32,uint256)", [node, coinType]);
-      return iface.encodeFunctionData("resolve", [dnsName, addrData]);
+      return IResolverService.encodeFunctionData("resolve", [dnsName, addrData]);
     })
     try{
       await offchainResolver.callStatic.multicall(callDatas);
