@@ -1,3 +1,4 @@
+import { formatsByCoinType } from '@ensdomains/address-encoder'
 import { Command } from 'commander';
 import ethers from 'ethers';
 import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/Resolver.sol/Resolver.json';
@@ -53,6 +54,7 @@ program
   .option('-i --chainId <chainId>', 'chainId', '1337')
   .option('-n --chainName <name>', 'chainName', 'unknown')
   .option('-u --uAddress <uaddress>', 'Universal Resolver address')
+  .option('-c --coinType <ctype>', 'coinType')
   .argument('<name>');
 
 program.parse(process.argv);
@@ -73,6 +75,7 @@ const ensAddress = options.registry;
 const uAddress = options.uAddress;
 const chainId = parseInt(options.chainId);
 const chainName = options.chainName;
+const coinType = parseInt(options.coinType) || 0 ;
 console.log(2, {
   ensAddress,
   uAddress,
@@ -113,20 +116,23 @@ console.log('3');
     )
     console.log(8, {offchainResolver, ResolverI, Gateway_abi})
     // const data = offchainResolver.interface.encodeFunctionData('addr(bytes32)', [node]);
-    const data = ResolverI.encodeFunctionData('addr(bytes32)', [node]);
+    // const data = ResolverI.encodeFunctionData('addr(bytes32,uint256)', [node, coinType]);
     const iface = new ethers.utils.Interface(
       [
         "function addr(bytes32) returns(address)",
-        // "function resolve(bytes,bytes) returns(bytes)",
+        "function addr(bytes32,uint256) returns(bytes)",
         "function resolve(bytes,bytes) returns(bytes,uint64,bytes)",
         "function multicall(bytes[])"
       ]
     );
-    const addrData = iface.encodeFunctionData("addr", [node]);
+    // const addrData = iface.encodeFunctionData("addr(bytes32)", [node]);
+    const addrData = iface.encodeFunctionData("addr(bytes32,uint256)", [node, coinType]);
 
     console.log('addr(bytes32)',{
-      sighash: iface.getSighash('addr(bytes32)'),
-      node, data, addrData
+      // sighash: iface.getSighash('addr(bytes32)'),
+      sighash: iface.getSighash('addr(bytes32,uint256)'),
+      // node, data, addrData
+      node, addrData
     })
 
     console.log(9, {dnsName, addrData})
@@ -173,7 +179,7 @@ console.log('3');
         const multiCallData = iface.encodeFunctionData("multicall", [[callData]]);
         const gatewayData = GatewayI.decodeFunctionData("query", e.errorArgs.callData);
         const gatewayUrl = url.replace('{sender}', lowerTo).replace('{data}', callData);
-        console.log(1, {gatewayUrl, multiCallData, callData})
+        console.log(1, {node, gatewayUrl, multiCallData, callData})
         console.log('gatewayData', gatewayData[0])
         const result = await fetch(gatewayUrl);
         console.log(2, {result})
@@ -182,9 +188,13 @@ console.log('3');
         const {responses:decodedQuery} = GatewayI.decodeFunctionResult('query', resultData)
         console.log(4, {decodedQuery})
         const {result:addrResult, expires, sig} = IResolverService.decodeFunctionResult('resolve', decodedQuery[0])
-        console.log(5, {addrResult, expires, sig})
-        const finalResult = iface.decodeFunctionResult("addr", addrResult);
-        console.log(6, {finalResult})
+        const { encoder, coinType:_coinType } =formatsByCoinType[coinType]
+        console.log(5, {coinType, _coinType, addrResult, expires, sig})
+        const finalResult = iface.decodeFunctionResult("addr(bytes32,uint256)", addrResult);
+        const hex = finalResult[0].slice(2)
+        const buffered = Buffer.from(hex, 'hex')
+        const decodedResult = encoder(buffered)
+        console.log(6, {finalResult, decodedResult})
       }else{
         console.log(105, e)
       }
