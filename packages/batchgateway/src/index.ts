@@ -1,8 +1,7 @@
 import { makeApp } from './server';
 import { Command } from 'commander';
 const program = new Command();
-program
-  .option('-p --port <number>', 'Port number to serve on', '8081');
+program.option('-p --port <number>', 'Port number to serve on', '8081');
 program.parse(process.argv);
 const options = program.opts();
 const app = makeApp('/');
