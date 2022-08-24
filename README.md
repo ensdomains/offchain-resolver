@@ -107,64 +107,6 @@ Done in 0.23s.
 Check these addresses against the gateway's `test.eth.json` and you will see that they match.
 
 
-## Batch gateway
-
-The normal gateway can only request single record at a time.
-The batch gateway will make use of of `OffchainMulticallable.multicall` function that combines multiple calls.
-
-To use the batch gateway, start the gateway server
-
-```
-yarn start:batch:gateway
-yarn run v1.22.18
-$ yarn workspace @ensdomains/offchain-resolver-batch-gateway start
-$ node dist/index.js
-Serving on port 8081
-```
-
-Then runs the batch client 
-
-```
- yarn start:batch:client  --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 --uAddress 0x71C95911E9a5D330f4D621842EC243EE1343292e foo.test.eth
-yarn run v1.22.18
-$ yarn workspace @ensdomains/offchain-resolver-batch-client start --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 --uAddress 0x71C95911E9a5D330f4D621842EC243EE1343292e foo.test.eth
-$ node dist/index.js --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 --uAddress 0x71C95911E9a5D330f4D621842EC243EE1343292e foo.test.eth
-{
-  name: 'foo.test.eth',
-  coinType: 60,
-  finalResult: [ '0x70997970c51812dc3a010c7d01b50e0d17dc79c8' ],
-  decodedResult: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
-}
-{
-  name: 'foo.test.eth',
-  coinType: 0,
-  finalResult: [ '0x0000000000000000000000000000000000000000' ],
-  decodedResult: 'bc1q9zpgru'
-}
-✨  Done in 1.27s.
-```
-
-### How it works.
-
-The batch client and gateway go through the following sequence.
-
-- Call `UniversalResolver.findResolver(dnsname)` to find the correct offchain resolver
-- Encode `addr(node,coinType)` call into `addrData`
-- Encode `resolver(dnsname, addrData)` into `callData`
-- Combine `callData` into the array of `callDatas`
-- Call `offchainResolver.multicall(callDatas)`
-- Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` with callData and each gateway url
-- Call the gateway server
-- The batch gateway server decodes `Gateway.query(callDatas)` and call each gateway server in parallel
-- Once the client receive the response, decode in the order of `Gateway.query` -> `ResolverService.resolve` -> `Resolver.addr(node, cointype)`
-- Decode each coin cointype
-
-### Todo
-
-- Make batch gateway deployable
-- Handle partial failure
-- Fix lint errors
-
 ## Real-world usage
 
 There are 5 main steps to using this in production:
