@@ -106,7 +106,6 @@ Done in 0.23s.
 
 Check these addresses against the gateway's `test.eth.json` and you will see that they match.
 
-
 ## Real-world usage
 
 There are 5 main steps to using this in production:
