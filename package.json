@@ -8,8 +8,8 @@
   "license": "MIT",
   "workspaces": [
     "packages/contracts",
-    "packages/client",
-    "packages/gateway"
+    "packages/gateway",
+    "packages/client"
   ],
   "private": true,
   "scripts": {
