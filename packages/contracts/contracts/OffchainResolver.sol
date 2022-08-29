@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@ensdomains/ens-contracts/contracts/resolvers/SupportsInterface.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
+import "@ensdomains/ens-contracts/contracts/utils/OffchainMulticallable.sol";
 
 interface IResolverService {
     function resolve(bytes calldata name, bytes calldata data) external view returns(bytes memory result, uint64 expires, bytes memory sig);
@@ -13,15 +14,22 @@ interface IResolverService {
  * Implements an ENS resolver that directs all queries to a CCIP read gateway.
  * Callers must implement EIP 3668 and ENSIP 10.
  */
-contract OffchainResolver is IExtendedResolver, SupportsInterface {
-    string public url;
+contract OffchainResolver is IExtendedResolver, ERC165, OffchainMulticallable {
+    string[] internal batchgateways;
+    string[] internal gateways;
+
     mapping(address=>bool) public signers;
 
     event NewSigners(address[] signers);
-    error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData);
+    // error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData);
 
-    constructor(string memory _url, address[] memory _signers) {
-        url = _url;
+    function batchGatewayURLs() internal override view returns(string[] memory) {
+        return batchgateways;
+    }
+
+    constructor(string[] memory _batchGateways, string[] memory _gateways, address[] memory _signers) {
+        batchgateways = _batchGateways;
+        gateways = _gateways;
         for(uint i = 0; i < _signers.length; i++) {
             signers[_signers[i]] = true;
         }
@@ -40,11 +48,9 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
      */
     function resolve(bytes calldata name, bytes calldata data) external override view returns(bytes memory) {
         bytes memory callData = abi.encodeWithSelector(IResolverService.resolve.selector, name, data);
-        string[] memory urls = new string[](1);
-        urls[0] = url;
         revert OffchainLookup(
             address(this),
-            urls,
+            gateways,
             callData,
             OffchainResolver.resolveWithProof.selector,
             callData
@@ -62,7 +68,7 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
         return result;
     }
 
-    function supportsInterface(bytes4 interfaceID) public pure override returns(bool) {
+    function supportsInterface(bytes4 interfaceID) public view override returns(bool) {
         return interfaceID == type(IExtendedResolver).interfaceId || super.supportsInterface(interfaceID);
     }
 }
