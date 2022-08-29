@@ -49,7 +49,7 @@ Serving on port 8000 with signing address 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
-Next, edit `packages/contracts/hardhat.config.js`; replacing the address on line 59 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry, the offchain resolver, and the Universal resolver deployed:
+Next, edit `packages/contracts/hardhat.config.js`; replacing the address on line 59 with the one output when you ran the command above. Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
 
 ```
 cd packages/contracts
@@ -60,12 +60,9 @@ You will see output similar to the following:
 
 ```
 Compilation finished successfully
-deploying "ENSRegistry" (tx: 0xded902cec50a22b4d797a27c88bf3a96a9d1bdbb41b6b40342cad729a18cee8d)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 743372 gas
-deploying "OffchainResolver" (tx: 0xd07d38decf02acff262ef085420fc1956233b6eb4d025a594915839835c21f60)...: deployed at 0x8464135c8F25Da09e49BC8782676a84730C318bC with 2086937 gas
-***registry 0x5FbDB2315678afecb367f032d93F642f64180aa3
-deploying "UniversalResolver" (tx: 0x1b666104bb78a5a22b1914a5902426975a88eaaab23ec275c4b92fe4d7bc1008)...: deployed at 0x71C95911E9a5D330f4D621842EC243EE1343292e with 1566841 gas
-Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/
-
+deploying "ENSRegistry" (tx: 0x8b353610592763c0abd8b06305e9e82c1b14afeecac99b1ce1ee54f5271baa2c)...: deployed at 0x5FbDB2315678afecb367f032d93F642f64180aa3 with 1084532 gas
+deploying "OffchainResolver" (tx: 0xdb3142c2c4d214b58378a5261859a7f104908a38b4b9911bb75f8f21aa28e896)...: deployed at 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 with 1533637 gas
+Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:9545/
 
 Accounts
 ========
