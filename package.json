@@ -9,6 +9,7 @@
   "workspaces": [
     "packages/contracts",
     "packages/gateway",
+    "packages/gateway-worker",
     "packages/client"
   ],
   "private": true,
