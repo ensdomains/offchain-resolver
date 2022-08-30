@@ -1,26 +1,11 @@
 import { Database } from './server';
+import { readFileSync } from 'fs';
 
 interface NameData {
   addresses?: { [coinType: number]: string };
   text?: { [key: string]: string };
   contenthash?: string;
 }
-
-const _data = {
-  "test.eth": {
-      "addresses": {
-          "60": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-      },
-      "text":{ "email": "test@example.com" }
-  },
-  "*.test.eth": {
-      "addresses": {
-          "60": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
-      },
-      "text":{ "email": "wildcard@example.com" }
-  }
-}
-
 
 type ZoneData = { [name: string]: NameData };
 
@@ -43,9 +28,9 @@ export class JSONDatabase implements Database {
     this.ttl = ttl;
   }
 
-  static fromKVStore(_filename: string, ttl: number) {
+  static fromFilename(filename: string, ttl: number) {
     return new JSONDatabase(
-      _data,
+      JSON.parse(readFileSync(filename, { encoding: 'utf-8' })),
       ttl
     );
   }
