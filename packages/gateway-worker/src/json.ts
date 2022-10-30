@@ -29,10 +29,7 @@ export class JSONDatabase implements Database {
 
   static async fromKVStore(store: any, ttl: number) {
     const data = await store.get('test.eth.json');
-    return new JSONDatabase(
-      JSON.parse(data),
-      ttl
-    );
+    return new JSONDatabase(JSON.parse(data), ttl);
   }
 
   addr(name: string, coinType: number) {

@@ -30,7 +30,7 @@ const provider = new ethers.providers.JsonRpcProvider(options.provider, {
     console.log(`resolver address ${resolver.address}`);
     console.log(`eth address ${resolveName}`);
     console.log(`content ${content}`);
-    console.log(`email ${email}`)
+    console.log(`email ${email}`);
   } else {
     console.log(`resolver not found for ${name}`);
   }

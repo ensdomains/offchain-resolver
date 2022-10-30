@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { JSONDatabase } from './json';
 
 const routeHandler = (env: any) => {
-  const { OFFCHAIN_STORE_DEV, OG_PRIVATE_KEY, OG_TTL } = env
+  const { OFFCHAIN_STORE_DEV, OG_PRIVATE_KEY, OG_TTL } = env;
   const privateKey = OG_PRIVATE_KEY;
   const address = ethers.utils.computeAddress(privateKey);
   const signer = new ethers.utils.SigningKey(privateKey);
@@ -14,8 +14,8 @@ const routeHandler = (env: any) => {
 };
 
 module.exports = {
-  fetch: function (request: Request, env: any, _context: any) {
+  fetch: function(request: Request, env: any, _context: any) {
     const router = routeHandler(env);
-    return router.handle(request) as any
-  }
+    return router.handle(request) as any;
+  },
 };
