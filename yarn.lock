@@ -1001,6 +1001,14 @@
   dependencies:
     "@nomiclabs/hardhat-truffle5" "^2.0.0"
 
+"@ensdomains/ccip-read-cf-worker@^0.2.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@ensdomains/ccip-read-cf-worker/-/ccip-read-cf-worker-0.0.1.tgz#7e0e77eb5cc1aae74d61b2175a819c3d2f1a157b"
+  integrity sha512-g87a2nwL9dJp+DCcQRA37VzEcmuRuIdy0fZWTppOHzB6XvlSlt7AuqexIdPObHZZzNpV1pePBySFyOnVe0Lt5Q==
+  dependencies:
+    ethers "^5.3.1"
+    itty-router "^2.6.1"
+
 "@ensdomains/ens-contracts@^0.0.8":
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/@ensdomains/ens-contracts/-/ens-contracts-0.0.8.tgz#883a280956468ea7b38f2694e5f0cc2711843431"
