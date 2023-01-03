@@ -59,7 +59,7 @@
   "dependencies": {
     "@chainlink/ethers-ccip-read-provider": "^0.2.3",
     "@cloudflare/workers-types": "^3.13.0",
-    "@ensdomains/ccip-read-cf-worker": "^0.2.1",
+    "@ensdomains/ccip-read-cf-worker": "^0.0.1",
     "@ensdomains/ens-contracts": "^0.0.8",
     "@ensdomains/offchain-resolver-contracts": "^0.2.1",
     "dotenv": "^15.0.0",
