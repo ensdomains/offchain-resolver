@@ -1,4 +1,4 @@
-import { Server } from '@chainlink/ccip-read-cf-worker';
+import { Server } from '@ensdomains/ccip-read-cf-worker';
 import { ethers, BytesLike } from 'ethers';
 import { hexConcat, Result } from 'ethers/lib/utils';
 import { Router } from 'itty-router';
