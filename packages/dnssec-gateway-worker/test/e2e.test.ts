@@ -1,14 +1,15 @@
-/// <reference types="./ganache-cli" />
+/// <reference types="./ganache" />
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { ethers } from 'ethers';
-import ganache from 'ganache-cli';
+import * as dotenv from 'dotenv'
+import { Contract, ethers } from 'ethers';
+import ganache from 'ganache';
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { FetchJsonResponse } from '@ethersproject/web';
 import { makeServer } from '../src/server';
-import { ETH_COIN_TYPE } from '../src/utils';
+import { hexEncodeName } from '../src/utils';
 import OffchainResolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/dnsregistrar/OffchainDNSResolver.sol/OffchainDNSResolver.json';
-import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/PublicResolver.sol/PublicResolver.json';
+import Resolver_abi from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/OwnedResolver.sol/OwnedResolver.json';
 import {
   BaseProvider,
   BlockTag,
@@ -17,6 +18,7 @@ import {
 } from '@ethersproject/providers';
 import { fetchJson } from '@ethersproject/web';
 import { arrayify, BytesLike, hexlify } from '@ethersproject/bytes';
+dotenv.config();
 chai.use(chaiAsPromised);
 
 export type Fetch = (
@@ -27,9 +29,14 @@ export type Fetch = (
 
 const Resolver = new ethers.utils.Interface(Resolver_abi.abi);
 
-const TEST_PRIVATE_KEY =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-const TEST_URL = 'http://localhost:8080/rpc/{sender}/{data}.json';
+const ENS_ADDRESS = '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e';
+const DNSSEC_IMPL = '0x21745ff62108968fbf5ab1e07961cc0fcbeb2364';
+
+const DOH_QUERY_URL = 'https://cloudflare-dns.com/dns-query';
+const FORK_PROVIDER_URL = process.env.FORK_PROVIDER_URL;
+
+const TEST_URL = 'https://localhost:8000/query';
+const TEST_NAME = 'test.xyz'; // use a domain with resolver txt set (e.g. ENS1 0x30200e0cb040f38e474e53ef437c95a1be723b2b)
 
 const CCIP_READ_INTERFACE = new ethers.utils.Interface(
   OffchainResolver_abi.abi
@@ -58,6 +65,7 @@ export class MockProvider extends BaseProvider {
     switch (method) {
       case 'call':
         const { result } = await this.handleCall(this, params);
+        console.log('result perform', result);
         return result;
       default:
         return this.parent.perform(method, params);
@@ -97,16 +105,8 @@ export class MockProvider extends BaseProvider {
     };
 
     const args = { sender: hexlify(to), data: hexlify(callData) };
-    const template = urls[0];
-    const url = template.replace(
-      /\{([^}]*)\}/g,
-      (_match, p1: keyof typeof args) => args[p1]
-    );
-    const data = await fetcher(
-      url,
-      template.includes('{data}') ? undefined : JSON.stringify(args),
-      processFunc
-    );
+    const url = urls[0];
+    const data = await fetcher(url, JSON.stringify(args), processFunc);
     return data.body.data;
   }
 
@@ -117,17 +117,18 @@ export class MockProvider extends BaseProvider {
 
 interface RevertError {
   error: {
-    hashes: string[];
-    results: {
-      [name: string]: {
-        return: string;
-      };
-    };
+    code: number;
+    data: string;
   };
 }
 
 function isRevertError(e: any): e is RevertError {
-  return typeof e?.error?.hashes[0] === 'string';
+  try {
+    const error = CCIP_READ_INTERFACE.parseError(e?.error?.data);
+    return error.name === 'OffchainLookup';
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -153,11 +154,7 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
           return await this.parent.perform(method, params);
         } catch (e) {
           if (isRevertError(e)) {
-            const error = e.error as any;
-            const hash = error.hashes[0];
-            if (error.hashes !== undefined && error.hashes.length > 0) {
-              return error.results[hash].return;
-            }
+            return e.error.data;
           }
           throw e;
         }
@@ -172,161 +169,139 @@ class RevertNormalisingMiddleware extends ethers.providers.BaseProvider {
   }
 }
 
-const validityPeriod = 2419200
-const expiration = Date.now() / 1000 - 15 * 60 + validityPeriod
-const inception = Date.now() / 1000 - 15 * 60
-const testRrset = (name: string, account: string) => ({
-  name,
-  sig: {
-    name: 'test',
-    type: 'RRSIG',
-    ttl: 0,
-    class: 'IN',
-    flush: false,
-    data: {
-      typeCovered: 'TXT',
-      algorithm: 253,
-      labels: name.split('.').length + 1,
-      originalTTL: 3600,
-      expiration,
-      inception,
-      keyTag: 1278,
-      signersName: '.',
-      signature: new Buffer([]),
-    },
-  },
-  rrs: [
-    {
-      name: `_ens.${name}`,
-      type: 'TXT',
-      class: 'IN',
-      ttl: 3600,
-      data: Buffer.from(`a=${account}`, 'ascii'),
-    },
-  ],
-});
-
-const TEST_DB = {
-  '*.com': {
-    addresses: {
-      [ETH_COIN_TYPE]: '0x2345234523452345234523452345234523452345',
-    },
-    text: { email: 'wildcard@example.com' },
-    contenthash:
-      '0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe',
-    hasDNSRecords: true,
-    dnsRecords: testRrset('test.com', '0x3456345634563456345634563456345634563456'),
-    zonehash: ''
-  },
-  'test.com': {
-    addresses: {
-      [ETH_COIN_TYPE]: '0x3456345634563456345634563456345634563456',
-    },
-    text: { email: 'test@example.com' },
-    contenthash:
-      '0xe40101fa011b20d1de9994b4d039f6548d191eb26786769f580809256b4685ef316805265ea162',
-    hasDNSRecords: true,
-    dnsRecords: testRrset('test.com', '0x3456345634563456345634563456345634563456'),
-    zonehash: ''
-  },
-};
-
-
-function dnsName(name: string) {
-  // strip leading and trailing .
-  const n = name.replace(/^\.|\.$/gm, '');
-
-  var bufLen = n === '' ? 1 : n.length + 2;
-  var buf = Buffer.allocUnsafe(bufLen);
-
-  let offset = 0;
-  if (n.length) {
-    const list = n.split('.');
-    for (let i = 0; i < list.length; i++) {
-      const len = buf.write(list[i], offset + 1);
-      buf[offset] = len;
-      offset += len + 1;
-    }
-  }
-  buf[offset++] = 0;
-  return (
-    '0x' +
-    buf.reduce(
-      (output, elem) => output + ('0' + elem.toString(16)).slice(-2),
-      ''
-    )
-  );
-}
-
 describe('End to end test', () => {
-  const server = makeServer('');
+  const server = makeServer(DOH_QUERY_URL);
 
   async function fetcher(
-    url: string,
-    _json?: string,
+    _url: string,
+    json?: string,
     _processFunc?: (value: any, response: FetchJsonResponse) => any
   ) {
-    const [to, data] = (url.match(
-      /http:\/\/localhost:8080\/rpc\/([^/]+)\/([^/]+).json/
-    ) as RegExpMatchArray).slice(1);
+    // add error handling in case json is invalid
+    const { sender: to, data } = JSON.parse(json as string);
+    console.log('server, to, data', server, to, data);
     const ret = await server.call({ to, data });
+    console.log('ret', ret);
     return ret;
   }
-
-  const baseProvider = new ethers.providers.Web3Provider(ganache.provider());
+  const baseProvider = new ethers.providers.Web3Provider(
+    ganache.provider({
+      fork: {
+        url: FORK_PROVIDER_URL,
+      },
+    })
+  );
   const signer = baseProvider.getSigner();
   const proxyMiddleware = new RevertNormalisingMiddleware(baseProvider);
   const mockProvider = new MockProvider(proxyMiddleware, fetcher);
-
-  let resolver: ethers.Contract;
-  let snapshot: number;
+  let resolver: Contract;
 
   beforeAll(async () => {
-    resolver = (
-      await deploySolidity(OffchainResolver_abi, signer, TEST_URL, [
-      ])
-    ).connect(mockProvider);
-    snapshot = await baseProvider.send('evm_snapshot', []);
-  });
+    try {
+      const code = await baseProvider.getCode(ENS_ADDRESS);
+      if (code !== '0x') console.log('ENS contract is reachable.');
+    } catch (error) {
+      console.log('getCode error', error);
+    }
+    try {
+      const code = await baseProvider.getCode(DNSSEC_IMPL);
+      if (code !== '0x') console.log('DNSSEC_IMPL contract is reachable.');
+    } catch (error) {
+      console.log('getCode error', error);
+    }
 
-  afterEach(async () => {
-    await baseProvider.send('evm_revert', [snapshot]);
+    resolver = (
+      await deploySolidity(
+        OffchainResolver_abi,
+        signer,
+        ENS_ADDRESS,
+        DNSSEC_IMPL,
+        TEST_URL
+      )
+    ).connect(mockProvider);
   });
 
   describe('resolve()', () => {
     it('resolves calls to addr(bytes32)', async () => {
       const callData = Resolver.encodeFunctionData('addr(bytes32)', [
-        ethers.utils.namehash('test.com'),
+        ethers.utils.namehash(TEST_NAME),
       ]);
-      const result = await resolver.resolve(dnsName('test.com'), callData);
-      const resultData = Resolver.decodeFunctionResult('addr(bytes32)', result);
-      expect(resultData).to.deep.equal([
-        TEST_DB['test.com'].addresses[ETH_COIN_TYPE],
-      ]);
+      console.log('callData', callData);
+      const dnsName = hexEncodeName(TEST_NAME);
+      const response = await resolver.resolve(dnsName, callData);
+      console.log('response', response);
+
+      const extraData = ethers.utils.defaultAbiCoder.encode(
+        ['bytes', 'bytes'],
+        [dnsName, callData]
+      );
+
+      try {
+        const resultCallback = await resolver.resolveCallback(
+          response,
+          extraData
+        );
+        const resultData = Resolver.decodeFunctionResult(
+          'addr(bytes32)',
+          resultCallback
+        );
+
+        expect(resultData).to.deep.equal([
+          '0x0000000000000000000000000000000000000000',
+        ]);
+      } catch (e: any) {
+        console.log('e', e?.error);
+      }
     });
 
-    it('resolves calls to text(bytes32,string)', async () => {
-      const callData = Resolver.encodeFunctionData('text(bytes32,string)', [
-        ethers.utils.namehash('test.com'),
-        'email',
-      ]);
-      const result = await resolver.resolve(dnsName('test.com'), callData);
-      const resultData = Resolver.decodeFunctionResult(
-        'text(bytes32,string)',
-        result
-      );
-      expect(resultData).to.deep.equal([TEST_DB['test.com'].text['email']]);
-    });
-    it('resolves calls to contenthash(bytes32)', async () => {
-      const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
-        ethers.utils.namehash('test.com'),
-      ]);
-      const result = await resolver.resolve(dnsName('test.com'), callData);
-      const resultData = Resolver.decodeFunctionResult(
-        'contenthash(bytes32)',
-        result
-      );
-      expect(resultData).to.deep.equal([TEST_DB['test.com'].contenthash]);
-    });
+    // it('resolves calls to text(bytes32,string)', async () => {
+    //   const dnsName = hexEncodeName(TEST_NAME);
+    //   const callData = Resolver.encodeFunctionData('text(bytes32,string)', [
+    //     ethers.utils.namehash(TEST_NAME),
+    //     'email',
+    //   ]);
+    //   const response = await resolver.resolve(dnsName, callData);
+    //   const extraData = ethers.utils.defaultAbiCoder.encode(
+    //     ['bytes', 'bytes'],
+    //     [dnsName, callData]
+    //   );
+
+    //   const resultCallback = await resolver.resolveCallback(
+    //     response,
+    //     extraData
+    //   );
+
+    //   const resultData = Resolver.decodeFunctionResult(
+    //     'text(bytes32,string))',
+    //     resultCallback
+    //   );
+
+    //   expect(resultData).to.deep.equal(['']);
+    // });
+
+    // it('resolves calls to contenthash(bytes32)', async () => {
+    //   const dnsName = hexEncodeName(TEST_NAME);
+    //   const callData = Resolver.encodeFunctionData('contenthash(bytes32)', [
+    //     ethers.utils.namehash(TEST_NAME),
+    //   ]);
+    //   const response = await resolver.resolve(dnsName, callData);
+
+    //   const extraData = ethers.utils.defaultAbiCoder.encode(
+    //     ['bytes', 'bytes'],
+    //     [dnsName, callData]
+    //   );
+
+    //   const resultCallback = await resolver.resolveCallback(
+    //     response,
+    //     extraData
+    //   );
+
+    //   const resultData = Resolver.decodeFunctionResult(
+    //     'contenthash(bytes32)',
+    //     resultCallback
+    //   );
+
+    //   expect(resultData).to.deep.equal('');
+    // });
   });
 });

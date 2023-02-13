@@ -25,6 +25,10 @@
       "pre-commit": "tsdx lint"
     }
   },
+  "jest": {
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
+    "testTimeout": 20000
+  },
   "prettier": {
     "printWidth": 80,
     "semi": true,
@@ -49,7 +53,7 @@
     "@types/chai-as-promised": "^7.1.4",
     "@types/dns-packet": "^5.2.4",
     "chai-as-promised": "^7.1.1",
-    "ganache-cli": "^6.12.2",
+    "ganache": "7.7.4",
     "husky": "^7.0.4",
     "size-limit": "^7.0.4",
     "tsdx": "^0.14.1",
