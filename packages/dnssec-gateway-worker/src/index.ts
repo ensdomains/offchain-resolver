@@ -1,12 +1,9 @@
 import { makeApp } from './server';
-import { ethers } from 'ethers';
 
 const routeHandler = (env: any) => {
-  const { OG_PRIVATE_KEY, DNS_SERVER } = env;
-  const privateKey = OG_PRIVATE_KEY;
-  const address = ethers.utils.computeAddress(privateKey);
-  const app = makeApp(DNS_SERVER, '/');
-  console.log(`Serving with signing address ${address}`);
+  const { DOH_API } = env;
+  const app = makeApp(DOH_API, '/query');
+  console.log(`Serving with DoH Resolver ${DOH_API}`);
   return app;
 };
 

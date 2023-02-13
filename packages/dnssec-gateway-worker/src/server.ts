@@ -1,18 +1,12 @@
 import { Server } from '@ensdomains/ccip-read-cf-worker';
 import { DNSProver, ProvableAnswer } from '@ensdomains/dnsprovejs';
-import { getKeyTag } from '@ensdomains/dnsprovejs/dist/prove';
-import { ethers } from 'ethers';
-import { Result } from 'ethers/lib/utils';
-import { Router } from 'itty-router';
-import { abi as IResolverService_abi } from '@ensdomains/ens-contracts/artifacts/contracts/dnsregistrar/OffchainDNSResolver.sol/OffchainDNSResolver.json';
-import { abi as Resolver_abi } from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/PublicResolver.sol/PublicResolver.json';
-import { TxtAnswer } from 'dns-packet';
-const Resolver = new ethers.utils.Interface(Resolver_abi);
+import { getKeyTag, SignedSet } from '@ensdomains/dnsprovejs/dist/prove';
+import { abi as IResolverService_abi } from '@ensdomains/ens-contracts/artifacts/contracts/dnsregistrar/OffchainDNSResolver.sol/IDNSGateway.json';
 
-interface RecordsResult {
-  result: any[];
-  ttl: number;
-}
+import { Result } from 'ethers/lib/utils';
+import { TxtAnswer } from 'dns-packet';
+import { Router } from 'itty-router';
+import { hexDecodeName, hexEncodeSignedSet } from './utils';
 
 function checkKeyTags(result: ProvableAnswer<TxtAnswer>) {
   let last = result.answer;
@@ -33,10 +27,8 @@ function checkKeyTags(result: ProvableAnswer<TxtAnswer>) {
         const validKeys = last.records.filter((r: any) =>
           dsTags.includes(getKeyTag(r))
         );
-        console.log(validKeys);
         if (!validKeys || validKeys.length < 1)
           throw Error('Valid keys cannot be empty');
-        console.log(validKeys.map((r: any) => getKeyTag(r)));
         if (
           !validKeys
             .map((r: any) => getKeyTag(r))
@@ -50,123 +42,35 @@ function checkKeyTags(result: ProvableAnswer<TxtAnswer>) {
   }
 }
 
-function decodeDnsName(dnsname: Buffer) {
-  const labels = [];
-  let idx = 0;
-  while (true) {
-    const len = dnsname.readUInt8(idx);
-    if (len === 0) break;
-    labels.push(dnsname.slice(idx + 1, idx + len + 1).toString('utf8'));
-    idx += len + 1;
-  }
-  return labels.join('.');
-}
-
-const queryHandlers: {
-  [key: string]: (records: TxtAnswer[], args: Result) => Promise<RecordsResult>;
-} = {
-  'addr(bytes32)': async (records, _args) => {
-    const { data, ttl } = records.filter(item => {
-      return item.data.toString().startsWith('a=');
-    })[0];
-    return { result: [data.toString().replace('a=', '')], ttl: ttl || 0 };
-  },
-  'addr(bytes32,uint256)': async (records, _args) => {
-    const { data, ttl } = records.filter(item => {
-      return item.data.toString().startsWith('a=');
-    })[0];
-    return { result: [data.toString().replace('a=', '')], ttl: ttl || 0 };
-    // const { addr, ttl } = await db.addr(name, args[0]);
-    // return { result: [addr], ttl };
-  },
-  // 'text(bytes32,string)': async (records, args) => {
-  //   const { value, ttl } = await db.text(name, args[0]);
-  //   return { result: [value], ttl };
-  // },
-  // 'contenthash(bytes32)': async (records, _args) => {
-  //   const { contenthash, ttl } = await db.contenthash(name);
-  //   return { result: [contenthash], ttl };
-  // },
-  // 'dnsRecord(bytes32,bytes32,uint16)': async (records, args) => {
-  //   const { dnsRecord, ttl } = await db.dnsRecord(name, args[0], args[1]);
-  //   return { result: [dnsRecord], ttl };
-  // },
-  // 'hasDNSRecords(bytes32,bytes32)': async (records, args) => {
-  //   const { hasDNSRecords, ttl } = await db.hasDNSRecords(name, args[0]);
-  //   return { result: [hasDNSRecords], ttl };
-  // },
-  // 'zonehash(bytes32)': async (records, _args) => {
-  //   const {zonehash, ttl} = await db.zonehash(name);
-  //   return { result: [zonehash], ttl };
-  // },
-};
-
-async function query(
-  records: TxtAnswer[],
-  name: string,
-  data: string
-): Promise<{ result: any; validUntil: number }> {
-  // Parse the data nested inside the second argument to `resolve`
-  const { signature, args } = Resolver.parseTransaction({ data });
-
-  if (ethers.utils.nameprep(name) !== name) {
-    throw new Error('Name must be normalised');
-  }
-
-  if (ethers.utils.namehash(name) !== args[0]) {
-    throw new Error('Name does not match namehash');
-  }
-
-  const handler = queryHandlers[signature];
-  if (handler === undefined) {
-    throw new Error(`Unsupported query function ${signature}`);
-  }
-
-  const { result, ttl } = await handler(records, args.slice(1));
-  // console.log('result, ttl', result, ttl);
-  return {
-    result: Resolver.encodeFunctionResult(signature, result),
-    validUntil: Math.floor(Date.now() / 1000 + ttl),
-  };
-}
-
-export function makeServer(dnsServer: string) {
+export function makeServer(dohApi: string) {
   const server = new Server();
+  // abi.encodeCall(IDNSGateway.resolve, (name, TYPE_TXT)),
+  // abi: function resolve(bytes memory name, uint16 qtype) external returns(DNSSEC.RRSetWithSignature[] memory)
   server.add(IResolverService_abi, [
     {
       type: 'resolve',
-      func: async ([encodedName, data]: Result, _request) => {
-        const name = decodeDnsName(Buffer.from(encodedName.slice(2), 'hex'));
+      func: async ([encodedName, _type]: Result, _request) => {
+        const name = hexDecodeName(encodedName);
         // Query the DNS
-        const prover = DNSProver.create(dnsServer);
+        const prover = DNSProver.create(dohApi);
         const dnsResult: ProvableAnswer<TxtAnswer> = (await prover.queryWithProof(
           'TXT',
-          `_ens.${name}`
+          name
         )) as ProvableAnswer<TxtAnswer>;
 
         checkKeyTags(dnsResult);
 
-        const {
-          answer: { records },
-        } = dnsResult;
-
-        const { result } = await query(records, encodedName, data);
-
-        const proof = [dnsResult.proofs.at(-1), dnsResult.proofs.at(-2)];
-
-        // change it with DNSSEC proof
-
-        // get the DNSSEC proof and return only that bit
-
-        // https://github.com/ensdomains/ens-contracts/blob/ccip-dnsregistrar/contracts/dnssec-oracle/DNSSEC.sol#L8
-
-        return [proof, result.answer.signature];
+        const proof = [
+          hexEncodeSignedSet(dnsResult.proofs.at(-1) as SignedSet<any>),
+          hexEncodeSignedSet(dnsResult.answer as SignedSet<any>),
+        ];
+        return [proof];
       },
     },
   ]);
   return server;
 }
 
-export function makeApp(dnsServer: string, path: string): Router {
-  return makeServer(dnsServer).makeApp(path);
+export function makeApp(dohApi: string, path: string): Router {
+  return makeServer(dohApi).makeApp(path);
 }

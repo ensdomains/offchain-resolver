@@ -3,13 +3,16 @@ import { SignedSet } from '@ensdomains/dnsprovejs';
 
 export const ETH_COIN_TYPE = 60;
 
-export function hexEncodeSignedSet(keys: any) {
-    const ss = new SignedSet(keys.rrs, keys.sig)
-    return [ss.toWire(), ss.signature.data.signature]
+export function hexEncodeSignedSet(keys: SignedSet<any>) {
+  return [keys.toWire(), keys.signature.data.signature]
 }
 
 export function hexEncodeName(name: string) {
     return '0x' + (packet as any).name.encode(name).toString('hex')
+}
+
+export function hexDecodeName(hex: string) {
+  return (packet as any).name.decode(Buffer.from(hex.slice(2), 'hex')).toString()
 }
 
 export function rootKeys(expiration: any, inception: any) {
