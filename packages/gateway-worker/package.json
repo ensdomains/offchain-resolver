@@ -1,5 +1,5 @@
 {
-  "version": "0.2.1",
+  "version": "0.0.1",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "wrangler dev",
     "build": "tsdx build",
     "test": "tsdx test",
     "lint": "tsdx lint",
@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@ensdomains/offchain-resolver-gateway",
+  "name": "@ensdomains/offchain-resolver-gateway-worker",
   "author": "Nick Johnson",
   "module": "dist/gateway.esm.js",
   "size-limit": [
@@ -53,15 +53,17 @@
     "size-limit": "^7.0.4",
     "tsdx": "^0.14.1",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "wrangler": "^2.0.7"
   },
   "dependencies": {
-    "@chainlink/ccip-read-server": "^0.2.1",
     "@chainlink/ethers-ccip-read-provider": "^0.2.3",
+    "@cloudflare/workers-types": "^3.13.0",
+    "@ensdomains/ccip-read-cf-worker": "^0.0.1",
     "@ensdomains/ens-contracts": "^0.0.8",
     "@ensdomains/offchain-resolver-contracts": "^0.2.1",
-    "commander": "^8.3.0",
     "dotenv": "^15.0.0",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "itty-router": "^2.6.1"
   }
 }
