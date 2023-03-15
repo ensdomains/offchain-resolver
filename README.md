@@ -34,22 +34,6 @@ First, install dependencies and build all packages:
 yarn && yarn build
 ```
 
-Clone [`ccip-read`](https://github.com/smartcontractkit/ccip-read) somewhere outside of this repo and checkout to the `mdt/cf-worker` branch
-
-Build the repo via `yarn build`
-
-Then, symlink the package with;
-```bash
-cd packages/server && yarn link
-```
-
-Go back to the `offchain-resolver` root folder and call;
-```
-cd packages/gateway && yarn link "@chainlink/ccip-read-server" && cd ../..
-```
-
-<br/>
-
 [Follow here](#running-locally) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )
 <br/><br/>
 
