@@ -4,9 +4,9 @@ import ethers from 'ethers';
 const program = new Command();
 program
   .requiredOption('-r --registry <address>', 'ENS registry address')
-  .option('-p --provider <url>', 'web3 provider URL', 'http://localhost:8545/')
-  .option('-i --chainId <chainId>', 'chainId', '1337')
-  .option('-n --chainName <name>', 'chainName', 'unknown')
+  .option('-p --provider <url>', 'web3 provider URL', 'http://127.0.0.1:8545')
+  .option('-i --chainId <chainId>', 'chainId', '31337')
+  .option('-n --chainName <name>', 'chainName', 'hardhat')
   .argument('<name>');
 
 program.parse(process.argv);
