@@ -1,6 +1,6 @@
 # ENS Offchain Resolver
-![CI](https://github.com/ensdomains/offchain-resolver/actions/workflows/main.yml/badge.svg)
 
+![CI](https://github.com/ensdomains/offchain-resolver/actions/workflows/main.yml/badge.svg)
 
 This repository contains smart contracts and a node.js gateway server that together allow hosting ENS names offchain using [EIP 3668](https://eips.ethereum.org/EIPS/eip-3668) and [ENSIP 10](https://docs.ens.domains/ens-improvement-proposals/ensip-10-wildcard-resolution).
 
@@ -39,7 +39,7 @@ yarn && yarn build
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
-Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 64` with the one output when you ran the command above. 
+Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 64` with the one output when you ran the command above.
 
 Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
 
@@ -108,29 +108,32 @@ Check these addresses against the gateway's `test.eth.json` and you will see tha
 
 There are 5 main steps to using this in production:
 
- 1. Optionally, write a new backend for the gateway that queries your own data store. Or, use the JSON one and write your records to a JSON file in the format described in the gateway repository.
- 2. Generate one or more signing keys. Secure these appropriately; posession of the signing keys makes it possible to forge name resolution responses!
- 3. Start up a gateway server using your name database and a signing key. Publish it on a publicly-accessible URL.
- 4. Deploy `OffchainResolver` to Ethereum, providing it with the gateway URL and list of signing key addresses.
- 5. Set the newly deployed resolver as the resolver for one or more ENS names.
+1.  Optionally, write a new backend for the gateway that queries your own data store. Or, use the JSON one and write your records to a JSON file in the format described in the gateway repository.
+2.  Generate one or more signing keys. Secure these appropriately; posession of the signing keys makes it possible to forge name resolution responses!
+3.  Start up a gateway server using your name database and a signing key. Publish it on a publicly-accessible URL.
+4.  Deploy `OffchainResolver` to Ethereum, providing it with the gateway URL and list of signing key addresses.
+5.  Set the newly deployed resolver as the resolver for one or more ENS names.
 
 ## Cloudflare Worker development
 
 ### Running locally
 
-1. Create a `dev.vars` file under `packages/gateway/` folder
-2. Put gateway private key into it in between double quotes, as below;
+1. Put gateway private key into `packages/gateway-worker/wrangler.toml` ;
+
 ```
-OG_PRIVATE_KEY="PRIVATE_KEY_HERE"
+OG_PRIVATE_KEY = "PRIVATE_KEY_HERE"
 ```
-3. Run worker with `wrangler dev --local` command
+
+2. Run worker with `wrangler dev --local` command under `packages/gateway-worker/` folder
 
 ### Deployment
 
 1. Register private key as a worker [secret](https://developers.cloudflare.com/workers/platform/environment-variables/#adding-secrets-via-wrangler).
+
 ```bash
 # wrangler secret put <key> <value>
 wrangler secret put OG_PRIVATE_KEY PRIVATE_KEY_HERE
 ```
+
 2. Build the gateway via `yarn build`
 3. Deploy the worker with `wrangler publish`

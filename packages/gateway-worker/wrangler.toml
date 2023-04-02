@@ -8,7 +8,7 @@ kv_namespaces = [
 ]
 
 [dev]
-port = 8000
+port = 8080
 
 [build]
 command = "yarn build"
