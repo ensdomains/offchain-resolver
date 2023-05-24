@@ -21,7 +21,9 @@ const provider = new ethers.providers.JsonRpcProvider(options.provider, {
 });
 (async () => {
   const name = program.args[0];
+  console.log(name);
   let resolver = await provider.getResolver(name);
+  console.log(resolver);
   if (resolver) {
     let ethAddress = await resolver.getAddress();
     let content = await resolver.getContentHash();

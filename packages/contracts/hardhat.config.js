@@ -13,10 +13,10 @@ const gatewayurl =
   'https://offchain-resolver-example.uc.r.appspot.com/{sender}/{data}.json';
 
 let devgatewayurl = 'http://localhost:8080/{sender}/{data}.json';
-if (process.env.REMOTE_GATEWAY) {
-  devgatewayurl =
-    `${process.env.REMOTE_GATEWAY}/{sender}/{data}.json`;
-}
+// if (process.env.REMOTE_GATEWAY) {
+//   devgatewayurl =
+//     `${process.env.REMOTE_GATEWAY}/{sender}/{data}.json`;
+// }
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
