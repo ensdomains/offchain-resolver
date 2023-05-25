@@ -1,10 +1,10 @@
 name = "offchain-gateway"
 compatibility_date = "2022-06-20"
-account_id = "de97cd2a1370a6ed2ad759f894179bff"
+account_id = "your account id here"
 main = "./src/index.ts"
 node_compat = true
 kv_namespaces = [
-    { binding = "OFFCHAIN_STORE_DEV", id = "eecc23992fe64d0ebd577896db6a94a4", preview_id = "eecc23992fe64d0ebd577896db6a94a4" }
+    { binding = "OFFCHAIN_STORE_DEV", id = "your kv_namespaces id here", preview_id = "your kv_namespaces id here" }
 ]
 
 [dev]
@@ -16,4 +16,5 @@ command = "yarn build"
 [vars]
 OG_DATA = "test.eth.json"
 OG_TTL = "60"
-OG_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+OG_PRIVATE_KEY="your private key here"
+CLOUDFLARE_API_TOKEN="your cloudflare api token here"
