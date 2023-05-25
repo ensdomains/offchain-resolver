@@ -34,7 +34,7 @@ First, install dependencies and build all packages:
 yarn && yarn build
 ```
 
-[Follow here](https://github.com/ensdomains/offchain-resolver/tree/main/packages/gateway-worker) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )
+[Follow here](https://github.com/ensdomains/offchain-resolver/blob/main/packages/gateway-worker/README.md) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )
 <br/><br/>
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
