@@ -7,12 +7,18 @@ const spawn = require('child_process').spawn;
 const { Command } = require('commander');
 
 const program = new Command();
-program.requiredOption('-d --data <file>', 'JSON file to read data from');
+program.option('-d, --data <file>', 'JSON file to read data from');
+
 program.parse(process.argv);
 const options = program.opts();
 
+if (!options.data) {
+  console.error('Error: No data file provided!');
+  process.exit(1);
+}
+
 const jsonDataPath = options.data;
-const rawData = fs.readFileSync(jsonPath, { encoding: 'utf8' });
+const rawData = fs.readFileSync(jsonDataPath, { encoding: 'utf8' });
 
 const putEntryToKVBash = spawn('wrangler', [
   'kv:key',
