@@ -34,12 +34,12 @@ First, install dependencies and build all packages:
 yarn && yarn build
 ```
 
-[Follow here](#running-locally) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )
+[Follow here](https://github.com/ensdomains/offchain-resolver/tree/main/packages/gateway-worker) to run gateway worker locally. ( Skip this step if cloudflare worker url will be used as a remote gateway )
 <br/><br/>
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
-Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 64` with the one output when you ran the command above.
+Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 65` with the one output when you ran the command above. Besure to add the `privatekey://` prefix if you are using a private key here.
 
 Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
 
@@ -113,27 +113,3 @@ There are 5 main steps to using this in production:
 3.  Start up a gateway server using your name database and a signing key. Publish it on a publicly-accessible URL.
 4.  Deploy `OffchainResolver` to Ethereum, providing it with the gateway URL and list of signing key addresses.
 5.  Set the newly deployed resolver as the resolver for one or more ENS names.
-
-## Cloudflare Worker development
-
-### Running locally
-
-1. Put gateway private key into `packages/gateway-worker/wrangler.toml` ;
-
-```
-OG_PRIVATE_KEY = "PRIVATE_KEY_HERE"
-```
-
-2. Run worker with `wrangler dev --local` command under `packages/gateway-worker/` folder
-
-### Deployment
-
-1. Register private key as a worker [secret](https://developers.cloudflare.com/workers/platform/environment-variables/#adding-secrets-via-wrangler).
-
-```bash
-# wrangler secret put <key> <value>
-wrangler secret put OG_PRIVATE_KEY PRIVATE_KEY_HERE
-```
-
-2. Build the gateway via `yarn build`
-3. Deploy the worker with `wrangler publish`
