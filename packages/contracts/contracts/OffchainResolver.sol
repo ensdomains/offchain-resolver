@@ -94,7 +94,9 @@ contract OffchainResolver is
         emit GatewayUrlUpdated(newUrl);
     }
 
-    // Function to add new signers, can only be called by the relayer
+    /**
+     Function to add new signers, can only be called by the relayer
+    */
     function addSigners(address[] memory newSigners) external onlyRelayer {
         for (uint i = 0; i < newSigners.length; i++) {
             signers[newSigners[i]] = true;
@@ -102,7 +104,9 @@ contract OffchainResolver is
         emit SignersUpdated(newSigners);
     }
 
-    // Function to remove signers, can only be called by the relayer
+    /**
+     Function to remove signers, can only be called by the relayer
+    */
     function removeSigners(
         address[] memory signersToRemove
     ) external onlyRelayer {
