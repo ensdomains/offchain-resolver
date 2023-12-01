@@ -47,7 +47,7 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
             urls,
             callData,
             OffchainResolver.resolveWithProof.selector,
-            callData
+            abi.encode(callData, address(this))
         );
     }
 
