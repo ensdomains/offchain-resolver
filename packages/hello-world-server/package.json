@@ -1,0 +1,25 @@
+{
+  "name": "hello-world-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicktaras/fastify-better-sqllite-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicktaras/fastify-better-sqllite-server/issues"
+  },
+  "homepage": "https://github.com/nicktaras/fastify-better-sqllite-server#readme",
+  "dependencies": {
+    "better-sqlite3": "^9.2.2",
+    "fastify": "^4.25.2"
+  }
+}
