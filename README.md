@@ -39,7 +39,7 @@ yarn && yarn build
 
 Take a look at the data in `test.eth.json` under `packages/gateway/`; it specifies addresses for the name `test.eth` and the wildcard `*.test.eth`.
 
-Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 65` with the one output when you ran the command above. Besure to add the `privatekey://` prefix if you are using a private key here.
+Next, edit `packages/contracts/hardhat.config.js`; replacing the address on `line 65` with the one output when you ran the command above. Be sure to add the `privatekey://` prefix if you are using a private key here.
 
 Then, in a new terminal, build and run a test node with an ENS registry and the offchain resolver deployed:
 
@@ -109,7 +109,7 @@ Check these addresses against the gateway's `test.eth.json` and you will see tha
 There are 5 main steps to using this in production:
 
 1.  Optionally, write a new backend for the gateway that queries your own data store. Or, use the JSON one and write your records to a JSON file in the format described in the gateway repository.
-2.  Generate one or more signing keys. Secure these appropriately; posession of the signing keys makes it possible to forge name resolution responses!
+2.  Generate one or more signing keys. Secure these appropriately; possession of the signing keys makes it possible to forge name resolution responses!
 3.  Start up a gateway server using your name database and a signing key. Publish it on a publicly-accessible URL.
 4.  Deploy `OffchainResolver` to Ethereum, providing it with the gateway URL and list of signing key addresses.
 5.  Set the newly deployed resolver as the resolver for one or more ENS names.
