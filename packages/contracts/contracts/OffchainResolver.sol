@@ -6,7 +6,7 @@ import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
 
 interface IResolverService {
-    function resolve(bytes calldata name, bytes calldata data) external view returns(bytes memory result, uint64 expires, bytes memory sig);
+    function resolve(bytes calldata name, bytes calldata data, address verifier) external view returns(bytes memory result, uint64 expires, bytes memory sig);
 }
 
 /**
@@ -39,7 +39,7 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
      * @return The return data, ABI encoded identically to the underlying function.
      */
     function resolve(bytes calldata name, bytes calldata data) external override view returns(bytes memory) {
-        bytes memory callData = abi.encodeWithSelector(IResolverService.resolve.selector, name, data);
+        bytes memory callData = abi.encodeWithSelector(IResolverService.resolve.selector, name, data, address(this));
         string[] memory urls = new string[](1);
         urls[0] = url;
         revert OffchainLookup(
@@ -47,7 +47,7 @@ contract OffchainResolver is IExtendedResolver, SupportsInterface {
             urls,
             callData,
             OffchainResolver.resolveWithProof.selector,
-            abi.encode(callData, address(this))
+            callData
         );
     }
 
