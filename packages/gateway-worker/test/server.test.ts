@@ -77,6 +77,7 @@ describe('makeServer', () => {
     const outerData = IResolverService.encodeFunctionData('resolve', [
       dnsName(name),
       innerData,
+      TEST_ADDRESS,
     ]);
     // Call the server with address and data
     const { status, body } = await server.call({
